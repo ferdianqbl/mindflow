@@ -14,7 +14,8 @@ This document presents the verification and validation tracker of all applicatio
 | **State Persistence**| Sync active session states to local cache and database | **Pending** | `src/components/timer.tsx` |
 | **Web Audio Synth** | Generate local Brown/White noise nodes with Web Audio API | **Pending** | `src/utils/noise-generator.ts` |
 | **Audio Mixer** | Mix ambient tracks (Rain, Lofi) and synthesized noise with separate volume dials | **Pending** | `src/components/audio-mixer.tsx` |
-| **Prisma DB Logger** | Write accomplished logs to PostgreSQL via Prisma Client | **Pending** | `src/app/api/logs/route.ts` |
+| **Prisma DB Logger** | Write accomplished logs to PostgreSQL via Prisma Client | **Passed** | `src/app/api/logs/route.ts` |
+| **Prisma Integration**| Instantiate type-safe db connection pools using pg driver adapter | **Passed** | `src/lib/prisma/index.ts` |
 | **Log Validation** | Lock check-ins to maximum 140 characters with category tag requirements | **Pending** | `src/components/journal-modal.tsx` |
 | **Timeline Feed** | Chronological list feed showing achievements of the current day | **Pending** | `src/components/timeline.tsx` |
 | **Standup Compiler** | Dynamic templates (Slack, YTB, Bullet) aggregating logged accomplishments | **Pending** | `src/utils/formatters.ts` |
@@ -31,7 +32,7 @@ This document presents the verification and validation tracker of all applicatio
 *   **Verification Method**: Log out and ensure the user session is destroyed and they are redirected back to the login screen.
 
 ### 2. Database Logs Writing (Prisma + PostgreSQL)
-*   **Verification Method**: Complete a focus session and submit the log modal. Query the database using Prisma Studio (`npx prisma studio`) or Supabase Database SQL Runner to verify that the record is written with correct column values:
+*   **Verification Method**: Complete a focus session and submit the log modal. Query the database using Prisma Studio or Supabase Database SQL Runner to verify that the record is written with correct column values:
     *   `userId` matches the logged-in user.
     *   `category` contains the selected tag.
     *   `description` matches user text.

@@ -13,31 +13,33 @@ We implement Mindflow as a full-stack web application using a modern, serverless
 *   **Database**: **PostgreSQL (via Supabase)**
     *   *Rationale*: Generous free tier, reliable managed SQL database, and support for high-concurrency client connections.
 *   **Database ORM**: **Prisma**
-    *   *Rationale*: Type-safe client queries and automated schema migration workflows.
-*   **User Authentication**: **Supabase Auth**
-    *   *Rationale*: Offloads password hashing, email verification, and session token storage, keeping the app secure and lightweight.
+    *   *Rationale*: Type-safe client queries and automated schema migration workflows. Uses `@prisma/adapter-pg` driver to connect via pooled configurations.
+*   **User Authentication**: **Supabase Auth & SSR**
+    *   *Rationale*: Offloads password hashing, email verification, and session token storage using `@supabase/ssr` to securely store tokens in cookies.
 *   **Real-time Syncer**: **Supabase Realtime (Presence & Broadcast)**
     *   *Rationale*: Connects online users on a shared WebSocket channel to sync Pomodoro states and presence dynamically.
 
 ---
 
-## 2. Database Schema (Prisma Models)
+## 2. Database Schema (Prisma Multi-File Schema)
 
-The schema defines two tables: `User` (linked to Supabase Auth UUID) and `FocusLog` (storing accomplishment records).
+The database schema is split into multi-file models inside the `src/db/prisma/schema` folder to organize structural entities:
 
+### A. Index & Datasource (`index.prisma`)
 ```prisma
-// prisma/schema.prisma
-
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") // Used for migrations bypassing pgBouncer
+  provider = "postgresql"
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+  output          = "../generated/client"
 }
+```
 
+### B. User Entity (`user.prisma`)
+```prisma
 model User {
   id        String     @id // Maps to Supabase auth.users.id (UUID string)
   email     String     @unique
@@ -46,7 +48,10 @@ model User {
 
   @@map("users")
 }
+```
 
+### C. Focus Log Entity (`focus-log.prisma`)
+```prisma
 model FocusLog {
   id              String   @id @default(uuid())
   userId          String
@@ -64,18 +69,14 @@ model FocusLog {
 
 ## 3. Directory Layout
 
-All filenames and folders are structured in **kebab-case** to maintain project consistency:
+All filenames and folders are structured in kebab-case and conform to the custom Supabase and Prisma configurations:
 
 ```
 mindflow/
 ├── package.json                # NPM dependency configurations
 ├── tsconfig.json               # strict TypeScript configurations
 ├── next.config.ts              # Next.js configurations
-├── prisma/
-│   ├── schema.prisma           # Database schema definition
-│   └── migrations/             # Generated SQL migration history files
-├── public/
-│   └── sounds/                 # Sound effects & loops
+├── prisma.config.ts            # Custom Prisma config mapping schema and migrations
 └── src/
     ├── app/                    # Next.js Page Router
     │   ├── layout.tsx          # Root shell mapping CSS, fonts, auth listeners
@@ -88,7 +89,7 @@ mindflow/
     │   └── api/                # API routes
     │       └── logs/
     │           └── route.ts    # GET (fetch user logs) & POST (write log)
-    ├── components/             # Kebab-case filenames
+    ├── components/             # UI Components
     │   ├── timer.tsx           # Countdown circular SVG timer
     │   ├── audio-mixer.tsx     # Soundboard volume dials
     │   ├── journal-modal.tsx   # Slide-in accomplishment journal form
@@ -97,14 +98,27 @@ mindflow/
     │   ├── wellness-guide.tsx  # Breathing circle guide for breaks
     │   ├── dashboard-stats.tsx # Heatmaps & percentage donut charts
     │   └── co-working-lounge.tsx # Real-time lobby list of online users
+    ├── db/
+    │   └── prisma/
+    │       ├── schema/         # Multi-file schema directory
+    │       │   ├── index.prisma
+    │       │   ├── user.prisma
+    │       │   └── focus-log.prisma
+    │       ├── migrations/     # Generated SQL migration history files
+    │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/
     │   ├── use-audio.ts        # Handles noise synth and lofi loops
     │   └── use-realtime-lounge.ts # Handles Supabase Realtime channel presence
+    ├── lib/
+    │   ├── prisma/
+    │   │   └── index.ts        # Prisma Client singleton connecting via pg adapter
+    │   └── supabase/           # Supabase SSR cookie wrappers
+    │       ├── client.ts       # Browser-side API client
+    │       ├── server.ts       # Server-side API client
+    │       └── middleware.ts   # Session refresh cookies middleware
     └── utils/
         ├── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
-        ├── noise-generator.ts  # Synthesizes brown frequency noise
-        ├── prisma.ts           # Shared PrismaClient instance helper
-        └── supabase.ts         # Supabase client initializer for Auth & Realtime
+        └── noise-generator.ts  # Synthesizes brown frequency noise
 ```
 
 ---
