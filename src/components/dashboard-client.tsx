@@ -6,7 +6,6 @@ import { LogOut, LayoutDashboard, History, ClipboardList, Coffee } from "lucide-
 
 // Components & Hooks import
 import Timer, { TimerMode, FOCUS_DURATION, BREAK_DURATION } from "@/components/timer";
-import AudioMixer from "@/components/audio-mixer";
 import JournalModal, { WorkCategory } from "@/components/journal-modal";
 import Timeline, { FocusLogItem } from "@/components/timeline";
 import StandupPanel from "@/components/standup-panel";
@@ -16,7 +15,6 @@ import CoWorkingLounge from "@/components/co-working-lounge";
 import PlanModal from "@/components/plan-modal";
 import ValidateModal from "@/components/validate-modal";
 
-import { useAudio } from "@/hooks/use-audio";
 import { useRealtimeLounge } from "@/hooks/use-realtime-lounge";
 
 interface DashboardClientProps {
@@ -42,10 +40,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   const [isValidateModalOpen, setIsValidateModalOpen] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState<"timeline" | "standup">("timeline");
 
-  // 3. Ambient Audio Mixer Hook
-  const audio = useAudio();
-
-  // 4. Real-time Co-working Presence Hook
+  // 3. Real-time Co-working Presence Hook
   const { coWorkers } = useRealtimeLounge(user.id, user.email, mode, secondsLeft, isRunning);
 
   // 5. Timer Control Actions
@@ -57,7 +52,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     }
     
     setIsRunning(true);
-    audio.play();
   };
 
   const handleStartSession = async (plans: Array<{ title: string; category: string; durationMin: number }>) => {
@@ -83,17 +77,14 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     setSecondsLeft(totalSeconds);
     setMode("focus");
     setIsRunning(true);
-    audio.play();
   };
 
   const handlePause = () => {
     setIsRunning(false);
-    audio.pause();
   };
 
   const handleReset = () => {
     setIsRunning(false);
-    audio.pause();
     
     if (mode === "break") {
       setSecondsLeft(breakDuration);
@@ -105,7 +96,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   const handleSkip = () => {
     setIsRunning(false);
-    audio.pause();
 
     if (mode === "focus") {
       // Skip work -> Start a break
@@ -132,8 +122,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   // Callback triggered when focus timer hits 0
   const handleFocusComplete = (durationMinutes: number) => {
-    // Stop audio
-    audio.pause();
     setIsRunning(false);
     // Open validation review overlay
     setIsValidateModalOpen(true);
@@ -215,7 +203,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   };
 
   const handleLogout = async () => {
-    audio.pause();
     await fetch("/api/auth/logout", { method: "POST" });
     router.replace("/login");
     router.refresh();
@@ -279,19 +266,9 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
               setMode={setMode}
               setIsRunning={setIsRunning}
               onFocusComplete={handleFocusComplete}
-              fadeOutAudio={audio.fadeOut}
               focusDuration={focusDuration}
               breakDuration={breakDuration}
               onUpdateDurations={handleUpdateDurations}
-            />
-
-            {/* Ambient Soundboard Mixer */}
-            <AudioMixer
-              isPlaying={audio.isPlaying}
-              volumes={audio.volumes}
-              play={audio.play}
-              pause={audio.pause}
-              setVolume={audio.setVolume}
             />
 
             {/* Real-time co-working lobby */}

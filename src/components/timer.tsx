@@ -17,7 +17,6 @@ interface TimerProps {
   setMode: React.Dispatch<React.SetStateAction<TimerMode>>;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   onFocusComplete: (durationMinutes: number) => void;
-  fadeOutAudio: () => void;
   focusDuration: number;
   breakDuration: number;
   onUpdateDurations: (focus: number, breakDur: number) => void;
@@ -38,7 +37,6 @@ export default function Timer({
   setMode,
   setIsRunning,
   onFocusComplete,
-  fadeOutAudio,
   focusDuration,
   breakDuration,
   onUpdateDurations,
@@ -147,7 +145,6 @@ export default function Timer({
             playChime();
             
             if (mode === "focus") {
-              fadeOutAudio();
               // Trigger accomplishments log overlay callback
               onFocusComplete(Math.round(focusDuration / 60));
             } else {
@@ -165,7 +162,7 @@ export default function Timer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, mode, setSecondsLeft, setIsRunning, setMode, fadeOutAudio, focusDuration]);
+  }, [isRunning, mode, setSecondsLeft, setIsRunning, setMode, focusDuration]);
 
   // Format MM:SS
   const formatTime = (secs: number) => {

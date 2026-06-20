@@ -33,11 +33,11 @@ This document indexes all documentation files for the full-stack edition of **Mi
 *   [x] Implement a middleware route guarding proxy checking session cookies to redirect unauthorized visitors to `/login`.
 *   [x] Build a Sign-out button on the main dashboard.
 
-### Phase 4: Focus Timer & Web Audio Synth
+### Phase 4: Focus Timer (Legacy: Web Audio Synth Removed)
 *   [x] Build the circular SVG timer component (`timer.tsx`) and hooks.
-*   [x] Implement Web Audio API synthesizers (`noise-generator.ts`) to produce brown focus noise.
-*   [x] Add loop audio players for lofi beats and rain sounds.
-*   [x] Build the `audio-mixer.tsx` with gain volume sliders.
+*   [x] (Legacy - Removed) Implement Web Audio API synthesizers (`noise-generator.ts`) to produce brown focus noise.
+*   [x] (Legacy - Removed) Add loop audio players for lofi beats and rain sounds.
+*   [x] (Legacy - Removed) Build the `audio-mixer.tsx` with gain volume sliders.
 
 ### Phase 5: Accomplishment Logs & API Writing
 *   [x] Create Next.js API route (`api/logs/route.ts`) to write logs to PostgreSQL using Prisma.

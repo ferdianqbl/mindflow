@@ -11,9 +11,23 @@ CREATE TABLE "focus_logs" (
 );
 
 -- CreateTable
+CREATE TABLE "task_plans" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "durationMin" INTEGER NOT NULL,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "task_plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
@@ -24,3 +38,6 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- AddForeignKey
 ALTER TABLE "focus_logs" ADD CONSTRAINT "focus_logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "task_plans" ADD CONSTRAINT "task_plans_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

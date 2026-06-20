@@ -54,9 +54,8 @@ The full-stack application includes three core page views:
 
 ### B. Core Dashboard (`/`)
 A responsive multi-column layout optimized for widescreen and mobile:
-*   **Left Section (Timer & Audio Mixer)**: 
+*   **Left Section (Timer & Utilities)**: 
     *   Features the large circular Pomodoro progress ring. The focus time input in the timer settings is disabled, displaying a helper tag noting it is automatically calculated from task plans.
-    *   Audio mixer sliders with glowing track fills.
     *   Status header displaying the user's active session mode.
 *   **Right Section (Standup & Timeline)**:
     *   Toggle layout to switch between **Logs Timeline** and **Standup Generator**.

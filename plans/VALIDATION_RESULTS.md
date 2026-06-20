@@ -13,8 +13,6 @@ This document presents the verification and validation tracker of all applicatio
 | **Timer Engine** | Pomodoro focus and break cycle triggers syncing countdown times | **Passed** | `src/components/timer.tsx`, `src/components/dashboard-client.tsx` |
 | **Session Task Planning** | Create specific task plans with durations before starting sessions | **Passed** | `src/components/plan-modal.tsx`, `src/app/api/plans/route.ts` |
 | **Task Validation** | Review tasks upon session end, logging finished tasks and carrying incomplete ones | **Passed** | `src/components/validate-modal.tsx`, `src/app/api/plans/validate/route.ts` |
-| **Web Audio Synth** | Generate local Brown/White noise nodes with Web Audio API | **Passed** | `src/utils/noise-generator.ts` |
-| **Audio Mixer** | Mix ambient tracks (Rain, Lofi) and synthesized noise with separate volume dials | **Passed** | `src/components/audio-mixer.tsx`, `src/hooks/use-audio.ts` |
 | **Prisma DB Logger** | Write accomplished logs to PostgreSQL via Prisma Client | **Passed** | `src/app/api/logs/route.ts` |
 | **Prisma Integration**| Instantiate type-safe db connection pools using pg driver adapter | **Passed** | `src/lib/prisma/index.ts` |
 | **Log Validation** | Lock check-ins to maximum 140 characters with category tag requirements | **Passed** | `src/components/journal-modal.tsx`, `src/app/api/logs/route.ts` |

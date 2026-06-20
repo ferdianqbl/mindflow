@@ -120,7 +120,6 @@ mindflow/
     │               └── route.ts # POST (check off completed tasks & log to FocusLog)
     ├── components/             # UI Components
     │   ├── timer.tsx           # Countdown circular SVG timer
-    │   ├── audio-mixer.tsx     # Soundboard volume dials
     │   ├── plan-modal.tsx      # Modal to build session plans before starting
     │   ├── validate-modal.tsx  # Modal to review and validate completed session tasks
     │   ├── journal-modal.tsx   # Modal for quick manual accomplishment logs
@@ -139,7 +138,6 @@ mindflow/
     │       ├── migrations/     # Generated SQL migration history files
     │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/
-    │   ├── use-audio.ts        # Handles noise synth and same-origin lofi loops
     │   └── use-realtime-lounge.ts # Handles Supabase Realtime channel presence
     ├── lib/
     │   ├── prisma/
@@ -147,8 +145,7 @@ mindflow/
     │   └── auth.ts             # Password hash & JWT sign/verify helper methods
     ├── proxy.ts                # Middleware routing proxy guarding cookie-auth routes
     └── utils/
-        ├── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
-        └── noise-generator.ts  # Synthesizes brown frequency noise
+        └── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
 ```
 
 ---

@@ -17,7 +17,7 @@ Unlike passive focus timers, Mindflow requires users to build a session task pla
     *   The user reviews, adds, or edits tasks (assigning categories and estimated durations in minutes).
     *   Starting the session sets the timer countdown to the sum of the planned tasks.
 *   **Ambient Focus Session**:
-    *   The user focuses while ambient audio loops in the background (Rain, Lofi Cafe, and synthesized Brown Noise).
+    *   The user focuses on their planned tasks during the Pomodoro countdown.
     *   Their status changes to `Focusing`, and their live timer countdown syncs to the co-working lounge.
 *   **Task Validation & Accomplishment Logging**:
     *   At the end of the focus block, a **Session Review** modal slides in. The user checks off finished tasks.
