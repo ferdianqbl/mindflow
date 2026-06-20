@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mindflow — Co-Working Pomodoro Timer & Standup Generator
 
-## Getting Started
+Mindflow is a premium full-stack web dashboard that combines an ambient Pomodoro timer with prompt-based micro-journaling and collaborative co-working features.
 
-First, run the development server:
+---
 
+## 🚀 How to Run It Locally
+
+### Prerequisites
+*   Node.js (LTS version)
+*   A Supabase project (providing a PostgreSQL database and Auth)
+
+### 1. Clone & Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone git@github.com:ferdianqbl/mindflow.git
+cd mindflow
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure Environment Variables
+Create a `.env` file in the root directory (refer to `.env.example`):
+```env
+# Database connection links
+DATABASE_URL="postgresql://postgres.[ID]:[PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres.[ID]:[PASSWORD]@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Supabase Web Auth/Realtime keys
+NEXT_PUBLIC_SUPABASE_URL="https://[YOUR-PROJECT-ID].supabase.co"
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOi..."
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Sync Database Tables & Compile Types
+Sync our database models (`User` and `FocusLog`) directly to your Supabase PostgreSQL instance and generate compiled Prisma Client types:
+```bash
+npx prisma db push
+npx prisma generate
+```
 
-## Learn More
+### 4. Boot the Local Server
+Launch the local Hot-Module-Replacement development server:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 Product Specification Questions ( Owen / Pixel8Labs )
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. What it is, and how to run it
+Mindflow is an ambient Pomodoro timer and logging tool that automatically compiles your completed focus sessions into Slack-ready daily standup reports. See local launch commands above.
 
-## Deploy on Vercel
+### 2. Who it's for, and the one job it has to do well
+It's built for remote developers, designers, and creators who hate writing daily standups or logging hours at the end of the day. The **one job** it must do well is taking all friction out of tracking achievements by prompting a 1-sentence log *only* when a timer completes, then auto-formatting logs into copy-pasteable reports.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Why this problem, and how you know it's worth solving
+Remote builders suffer from context-switching and forget their daily accomplishments by 5:00 PM. Scrambling through Git commits or Slack logs to write a daily update wastes 10-15 minutes of cognitive overhead. Habit-building focus timers are valuable but usually passive; linking reflection directly with timer milestones creates a self-reporting mechanism.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. What's already out there for it, and why you built this anyway
+Standard Pomodoro apps exist, but they are passive and don't record outcomes. Heavy project tools (Trello, Jira) track project states, not personal time blocks or reflections. Notes apps require manual formatting. We built Mindflow to combine focus acoustics, active reflection prompts, and automated markdown compilation into a single, cohesive interface.
+
+### 5. What you put in scope, what you left out, and why
+*   **In Scope**: Glassmorphic dark UI, Web Audio API brown noise synthesizer (requires zero CPU/bandwidth), Supabase Auth/Cookies session middleware, database logging (Prisma + Postgres), a real-time Co-working presence lounge, and Slack/YTB formatters.
+*   **Left Out**: OAuth integrations (Google/GitHub login) to avoid API keys setup friction for local review, and calendar synced timelines.
+
+### 6. Where you didn't have answers, what you assumed
+*   *Assumption*: Assumed co-working users only need to see active states (`Focusing`, `Resting`, `Idle`) and countdowns for motivational peer pressure.
+*   *Solution*: Implemented an absolute epoch timestamp sync system: instead of broadcasting websocket events every second (which hits free-tier rate limits), clients only broadcast when their timer state shifts, and observers calculate active ticks locally.
+
+### 7. Three questions you'd ask a real user before building more
+1.  *"Would you prefer to sync your logs with local Git commits automatically so you don't even have to type?"*
+2.  *"Would a browser extension or IDE widget be more useful than a web page to keep the timer visible while coding?"*
+3.  *"Do you want to see team-level statistics and aggregated analytics, or is solo-reporting privacy a priority?"*
+
+### 8. How you'd know it's working, and what you'd do next
+*   *Indicator of success*: Users copy their standup compiled text on average 4.5 times a week, and maintain focus streaks of 3+ days.
+*   *Next Steps*: Implement integrations with Slack/Discord webhooks so logs are sent directly to channels upon clicking "Copy".
