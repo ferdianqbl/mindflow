@@ -1,58 +1,62 @@
-# System Architecture - Mindflow
+# System Architecture - Mindflow (Co-Working Edition)
 
-This document details the software architecture, libraries, local state schemas, folder structure, and deployment strategies for **Mindflow**.
+This document provides a detailed breakdown of the technology stack, database schemas, folder structures, and third-party integrations for **Mindflow**.
 
 ---
 
 ## 1. Stack Selection & Rationale
 
-We implement Mindflow as a high-fidelity Client-Side Single Page Application (SPA). This guarantees 100% uptime for reviewers, loads instantly, and runs entirely in-browser without database delays or container startup overheads.
+We implement Mindflow as a full-stack web application using a modern, serverless-friendly framework:
 
-### Tech Stack Details
-
-*   **Build Tool & Dev Environment**: **Vite (with TypeScript & React)**
-    *   *Rationale*: Instant Hot Module Replacement (HMR) for fast iteration, and optimized static asset packaging.
-*   **Styling**: **Vanilla CSS (Modern Custom Variables)**
-    *   *Rationale*: Full control over glassmorphism filters, glowing border shaders, range sliders, and custom animation curves.
-*   **Audio Engine**: **Native Browser Web Audio API & HTML5 Audio**
-    *   *Web Audio Synthesis*: Synthesizes focus noise (Brown/White/Pink noise) directly on the client using the browser's audio nodes. This requires **zero bandwidth** and runs fully offline.
-    *   *HTML5 Audio Hooks*: Loops relaxing soundscapes (Lofi, Rain) using royalty-free, compressed background tracks.
-*   **State Persistence**: **Browser LocalStorage**
-    *   *Rationale*: Stores timer state and daily logs locally. Session progress is completely safe from accidental tab reloads.
-
-### Core Dependencies
-
-We keep package overhead low to maintain speed and reliability:
-*   `lucide-react`: High-quality SVG icons.
-*   `canvas-confetti`: Celebratory animations when standup text is successfully generated and copied.
+*   **Framework**: **Next.js (App Router)**
+    *   *Rationale*: Combines a React frontend with serverless API endpoints. Hosted on Vercel, it spins up instantly, eliminating container "cold-starts".
+*   **Database**: **PostgreSQL (via Supabase)**
+    *   *Rationale*: Generous free tier, reliable managed SQL database, and support for high-concurrency client connections.
+*   **Database ORM**: **Prisma**
+    *   *Rationale*: Type-safe client queries and automated schema migration workflows.
+*   **User Authentication**: **Supabase Auth**
+    *   *Rationale*: Offloads password hashing, email verification, and session token storage, keeping the app secure and lightweight.
+*   **Real-time Syncer**: **Supabase Realtime (Presence & Broadcast)**
+    *   *Rationale*: Connects online users on a shared WebSocket channel to sync Pomodoro states and presence dynamically.
 
 ---
 
-## 2. LocalStorage Schema Definitions
+## 2. Database Schema (Prisma Models)
 
-Mindflow uses two distinct local storage blocks to preserve state:
+The schema defines two tables: `User` (linked to Supabase Auth UUID) and `FocusLog` (storing accomplishment records).
 
-### A. Active Session State (`mindflow_session`)
-Tracks the current running state of the Pomodoro timer.
-```typescript
-interface SessionState {
-  mode: 'focus' | 'break' | 'idle';
-  timeLeft: number;           // Remaining seconds
-  isRunning: boolean;
-  totalDuration: number;      // Target seconds (e.g. 1500)
-  startedAt: string | null;   // ISO timestamp
+```prisma
+// prisma/schema.prisma
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Used for migrations bypassing pgBouncer
 }
-```
 
-### B. Accomplishment History (`mindflow_logs`)
-Stores an array of completed daily log items.
-```typescript
-interface DailyLog {
-  id: string;                 // UUID or timestamp
-  timestamp: string;          // ISO completion time
-  category: 'coding' | 'debugging' | 'design' | 'learning' | 'meeting' | 'operations';
-  description: string;        // 140-char journal text
-  durationMinutes: number;    // Length of focus block (e.g., 25)
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String     @id // Maps to Supabase auth.users.id (UUID string)
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  logs      FocusLog[]
+
+  @@map("users")
+}
+
+model FocusLog {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        String   // e.g. "coding" | "debugging" | "design" | "learning" | "meeting" | "operations"
+  description     String   // Max 140 characters
+  durationMinutes Int      @default(25)
+  createdAt       DateTime @default(now())
+
+  @@map("focus_logs")
 }
 ```
 
@@ -60,38 +64,53 @@ interface DailyLog {
 
 ## 3. Directory Layout
 
-The codebase is organized modularly:
+The codebase is organized modularly under the Next.js App Router structure:
 
 ```
 mindflow/
-├── package.json              # Script configurations and package metadata
-├── tsconfig.json             # Strict TypeScript settings
-├── vite.config.ts            # Vite compile setups
-├── index.html                # Entry document mounts fonts (Outfit/Inter)
+├── package.json                # NPM dependency configurations
+├── tsconfig.json               # strict TypeScript configurations
+├── next.config.ts              # Next.js configurations
+├── prisma/
+│   ├── schema.prisma           # Database schema definition
+│   └── migrations/             # Generated SQL migration history files
 ├── public/
-│   └── sounds/               # Copyright-free background MP3 loops
+│   └── sounds/                 # Sound effects & loops
 └── src/
-    ├── main.tsx              # Application boots here
-    ├── index.css             # Main styling, design tokens, glass effects
+    ├── app/                    # Next.js Page Router
+    │   ├── layout.tsx          # Root shell mapping CSS, fonts, auth listeners
+    │   ├── globals.css         # Tailwind v4 & theme properties
+    │   ├── page.tsx            # Protected dashboard view (guards auth)
+    │   ├── login/
+    │   │   └── page.tsx        # Login layout
+    │   ├── register/
+    │   │   └── page.tsx        # Registration layout
+    │   └── api/                # API routes
+    │       └── logs/
+    │           └── route.ts    # GET (fetch user logs) & POST (write log)
     ├── components/
-    │   ├── Timer.tsx         # Circular SVG timer, actions (Start/Pause/Reset)
-    │   ├── AudioMixer.tsx    # Volume dials, audio track select sliders
-    │   ├── JournalModal.tsx  # Slide-in accomplishment journal form
-    │   ├── StandupPanel.tsx  # Format toggles, preview text blocks, copy triggers
-    │   ├── Timeline.tsx      # Vertical chronological list of logs
-    │   └── WellnessGuide.tsx # Morphing breath cycle animation for break periods
+    │   ├── Timer.tsx           # Countdown circular SVG timer
+    │   ├── AudioMixer.tsx      # Soundboard volume dials
+    │   ├── JournalModal.tsx    # Slide-in accomplishment journal form
+    │   ├── Timeline.tsx        # Chronicled timeline of focus blocks
+    │   ├── StandupPanel.tsx    # Copy standup format selectors
+    │   ├── WellnessGuide.tsx   # Breathing circle guide for breaks
+    │   ├── DashboardStats.tsx  # Heatmaps & percentage donut charts
+    │   └── CoWorkingLounge.tsx # Real-time lobby list of online users
     ├── hooks/
-    │   ├── useAudio.ts       # Synth noise engine & background track player
-    │   └── useLocalStorage.ts # Reactive hook syncing state to browser storage
+    │   ├── useAudio.ts         # Handles noise synth and lofi loops
+    │   └── useRealtimeLounge.ts # Handles Supabase Realtime channel presence
     └── utils/
-        ├── formatters.ts     # Standup text compilers (Slack, YTB, Markdown formats)
-        └── noiseGenerator.ts # Web Audio API oscillator/buffer builder for brown noise
+        ├── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
+        ├── noiseGenerator.ts   # Synthesizes brown frequency noise
+        ├── prisma.ts           # Shared PrismaClient instance helper
+        └── supabase.ts         # Supabase client initializer for Auth & Realtime
 ```
 
 ---
 
-## 4. Deployment Strategy
+## 4. Deployment Topology
 
-*   **Hosting**: The application is deployed to **Vercel** or **Netlify** as a static project.
-*   **CI/CD Pipeline**: Any push to the `main` branch of the GitHub repository triggers an automatic build and deploy.
-*   **Redirects & Routes**: Since the app is a single-page app with no custom router, no specialized routing rules or rewrite rules are required, minimizing production failure modes.
+*   **Hosting Platform**: Vercel (Frontend & Serverless API routes).
+*   **Database Host**: Supabase (AWS / PostgreSQL instance).
+*   **State Sync**: Next.js serverless functions query Prisma/PostgreSQL for logs, while browser-side Supabase Clients connect to WebSockets directly for Auth and Realtime Presence.

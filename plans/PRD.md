@@ -1,61 +1,57 @@
-# Product Requirements Document (PRD) - Mindflow
+# Product Requirements Document (PRD) - Mindflow (Co-Working Edition)
 
 ## 1. Product Overview
-**Mindflow** is a sleek, ambient web dashboard that combines a Pomodoro focus timer with prompt-based micro-journaling. It is designed to solve a major daily pain point for remote builders (developers, designers, creators): **the friction of keeping track of what they did during the day for standups and daily logs.**
+**Mindflow (Co-Working Edition)** is a premium full-stack web dashboard that combines an ambient Pomodoro focus timer with prompt-based micro-journaling and collaborative co-working features. 
 
-Instead of letting focus sessions be passive, Mindflow engages the user at the end of each session to write a 1-sentence accomplishment. At the end of the day, these micro-logs are aggregated and formatted into professional daily standup updates (Slack, Discord, Markdown) that can be copied with a single click.
+Unlike passive focus timers, Mindflow prompts users to log a 1-sentence achievement immediately upon session completion, storing logs in a persistent database. It compiles these achievements into professional, copyable standup updates (Slack, Discord, Markdown). Additionally, it features a **Co-Focusing Lounge** where users can see other active members working in real-time, boosting motivation through accountability.
 
 ---
 
 ## 2. Core User Journeys
 
-*   **Focus Session Initiation**:
-    *   The user arrives at the dashboard and sees a clean, minimalist countdown timer.
-    *   They can select an ambient soundtrack (e.g., Rain, Lofi Beats, White Noise) and adjust its volume.
-    *   They click "Start Focus" to begin a 25-minute focus session.
-*   **Active Focusing**:
-    *   The timer counts down with a smooth circular visual and a glowing pulsing breath animation.
-    *   Ambient audio loops smoothly in the background to mask distractions.
-*   **Micro-Journaling Check-in**:
-    *   When the timer hits zero, a gentle notification sound plays, and a glassmorphic modal overlay slides in: *"What did you achieve in this focus block?"*
-    *   The user tags the work category (e.g., `💻 Coding`, `🐛 Debugging`, `🎨 UI/UX`, `📚 Learning`, `🤝 Meeting`).
-    *   They type a quick summary (max 140 characters) and submit.
-*   **Rest & Transition**:
-    *   A 5-minute break timer starts automatically.
-    *   The user is encouraged to stretch or do a quick breathing exercise (animated visual guide provided).
-*   **Standup Export & Review**:
-    *   Below the timer, a vertical daily timeline displays all completed blocks.
-    *   At the end of the day, the user clicks "Export Standup".
-    *   They select their template (Slack list, Markdown, or Standard Yesterday/Today/Blocker), preview the text, and copy it to their clipboard with a satisfying completion feedback.
+*   **User Registration & Authentication**:
+    *   A user signs up or logs in securely via email and password using **Supabase Auth**.
+    *   They are redirected to their personalized dashboard, restoring all historical focus records.
+*   **Ambient Focus Session**:
+    *   The user starts a focus block (25 minutes). Ambient audio loops in the background (Rain, Lofi Cafe, synthesized Brown Noise).
+    *   During focus, their co-working status shifts to `Focusing` with their live countdown timer synced to the co-working channel.
+*   **Accomplishment Logging**:
+    *   At the end of the focus block, a glassmorphic journal modal slides in. The user tags a category (Coding, Debugging, Design, etc.) and writes a 1-sentence log (max 140 chars).
+    *   Submitting the log saves it to the **Supabase PostgreSQL** database via **Prisma ORM**.
+*   **Rest & Ergonomics Guide**:
+    *   A 5-minute break starts automatically. Their status changes to `Resting`.
+    *   A smooth breathing SVG bubble guides them through micro-breaks.
+*   **Analytics Dashboard**:
+    *   The user reviews their focus analytics: total sessions, time focused, category breakdown charts, and progress timeline.
+    *   They can export their daily logs into formatted text (Slack, Markdown) with a copy success alert.
+*   **Co-Focusing Lounge**:
+    *   The user joins a real-time lobby where they see active cards of other online users, their current status (`Focusing`, `Resting`, `Idle`), and how many minutes remain in their session.
 
 ---
 
 ## 3. Functional Requirements
 
-### Focus Timer & Ambient Sounds
-*   Standard 25-minute Focus and 5-minute Break cycle.
-*   Ability to pause, reset, or skip the timer.
-*   An audio mixer with multiple ambient channels:
-    *   *Lofi Cafe* (music track)
-    *   *Heavy Rain* (sound effect)
-    *   *Cosmic Synth* (slow synth pads)
-    *   *White/Brown Noise* (steady frequency)
-*   Independent volume sliders and play/pause controls.
+### User Authentication (Supabase Auth)
+*   Email and password sign-up, sign-in, and sign-out.
+*   Protected route guarding (anonymous users redirected to `/login`).
 
-### Micro-Journaling
-*   Overlay popup that locks the dashboard until a log is entered or explicitly skipped.
-*   Predefined tag selection buttons: Coding, Debugging, UI/UX, Learning, Meeting, Operations.
-*   Textarea input restricted to 140 characters with a live character countdown.
+### Database Logging (Prisma + PostgreSQL)
+*   Every completed session creates a row in the `FocusLog` table:
+    *   `id`: Primary key (UUID).
+    *   `userId`: Foreign key mapping to user auth.
+    *   `category`: String tag enum (Coding, Debugging, UI/UX, Learning, Meeting, Operations).
+    *   `description`: String, max 140 chars.
+    *   `durationMinutes`: Integer (default 25).
+    *   `createdAt`: Timestamp.
 
-### Daily Standup Generator
-*   A vertical timeline visualizing each block: timestamp, tag, log text, and status.
-*   A generator panel that aggregates all logs of the current day.
-*   Multiple formatting templates:
-    *   **Slack Format**: Category-grouped list with emojis.
-    *   **Yesterday-Today-Blockers (YTB)**: Splits completed tasks into a clean layout.
-    *   **Bullet Journal**: Raw markdown list with bullet checkmarks.
-*   Single-button click-to-copy to clipboard.
+### Analytics Dashboard
+*   Fetch and aggregate historical logs:
+    *   Total focused hours and completed sessions.
+    *   Categorized percentage chart (SVG-based or light canvas chart).
+    *   Daily timeline feed of logs.
+*   Export standup text with Slack-styled emoji grouping and Markdown.
 
-### Data Persistence & Integrity
-*   All data must persist across browser refreshes via `localStorage`.
-*   Ability to reset the dashboard (clear daily progress) to start a new day.
+### Real-Time Co-Working Lounge
+*   Uses **Supabase Realtime (Presence & Broadcast)** to track connected client states.
+*   Each user broadcasts their profile username, current state (`focus` | `break` | `idle`), and `secondsLeft` on their timer.
+*   Online user listing updates dynamically (users who close the tab disappear from the list).

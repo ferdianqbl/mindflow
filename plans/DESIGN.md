@@ -1,106 +1,95 @@
-# UI/UX Design System Specification - Mindflow
+# UI/UX Design System Specification - Mindflow (Co-Working Edition)
 
-This document defines the visual theme, design philosophy, color palette, custom CSS variables, layout strategy, and interactive animations for **Mindflow**.
-
----
-
-## 1. Design Philosophy: Glassmorphic & Ambient
-
-Mindflow is designed to keep users in a state of calm focus while minimizing work logging friction. We apply three core design principles:
-1.  **Glassmorphism & Depth**: Translucent interfaces that blend with the background, giving a spacious, lightweight feel.
-2.  **Color-Coded States**: The UI shifts subtle background glows and highlights based on the active state (Focus = Cyan/Ice Blue, Break = Purple/Violet, Journal = Amber/Orange).
-3.  **Micro-Interactions**: Smooth SVG transitions, pulsing breath meters, and tactile animations that reward completing focus milestones.
+This document defines the visual system, glassmorphism UI variables, page layouts (including authentication and co-working modules), and state transitions for the full-stack edition of **Mindflow**.
 
 ---
 
-## 2. Color Palette & Custom Theme (CSS Variables)
+## 1. Design System Tokens (CSS Custom Properties)
 
-We define a custom color system in our main CSS file to achieve a futuristic, calming look:
+We define a custom theme with cosmic gradients, glowing highlight borders, and state indicators:
 
 ```css
 :root {
-  /* Theme Backgrounds */
-  --bg-primary: #070a13;                /* Deep cosmic obsidian */
-  --bg-glow-focus: radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 50%);
-  --bg-glow-break: radial-gradient(circle at 10% 20%, rgba(217, 70, 239, 0.08) 0%, transparent 50%);
+  /* Backgrounds & Canvas */
+  --bg-primary: #070a13;                 /* Deep space obsidian */
+  --bg-radial: radial-gradient(circle at 50% 50%, #0d1527 0%, #070a13 100%);
+  
+  /* Glassmorphism Surface Tokens */
+  --card-surface: rgba(13, 20, 38, 0.45);    /* Semi-transparent slate card */
+  --card-border: rgba(255, 255, 255, 0.06);   /* Standard glass edge */
+  --card-border-active: rgba(0, 242, 254, 0.25);  /* Glowing focus edge */
 
-  /* Glassmorphic Surfaces */
-  --card-surface: rgba(13, 20, 38, 0.45);   /* Translucent indigo slate */
-  --card-border: rgba(255, 255, 255, 0.06);  /* Soft glowing edge border */
-  --card-border-active: rgba(0, 242, 254, 0.25); /* Glowing cyan highlight edge */
+  /* Co-Working Presence Status Colors */
+  --color-focus: #00f2fe;                /* Active Focus (Cyan glow) */
+  --color-break: #d946ef;                /* Break Time (Orchid purple glow) */
+  --color-idle: #94a3b8;                 /* Idle state (Muted cool gray) */
+  
+  /* Feedback Colors */
+  --color-success: #10b981;              /* Success tags & completed markers */
+  --color-danger: #ef4444;               /* Validation error glows */
+  --color-amber: #f59e0b;                /* Modal notifications */
 
-  /* State Colors */
-  --color-focus: #00f2fe;               /* Ice Cyan (Focus mode) */
-  --color-break: #d946ef;               /* Vibrant Orchid (Break mode) */
-  --color-journal: #f59e0b;             /* Warm Amber (Logging state) */
-  --color-success: #10b981;             /* Emerald Green (Completed logs) */
+  /* Typography */
+  --text-primary: #f8fafc;               /* White text */
+  --text-secondary: #94a3b8;             /* Cool gray text */
+  --text-muted: #64748b;                 /* Muted descriptive label text */
 
-  /* Typography Colors */
-  --text-primary: #f8fafc;              /* Slate White */
-  --text-secondary: #94a3b8;            /* Cool Gray */
-  --text-muted: #64748b;                /* Dark Slate Gray */
-
-  /* Layout Constants */
+  /* Shadows & Radius */
   --radius-card: 20px;
   --radius-button: 12px;
+  --shadow-glow-focus: 0 0 20px rgba(0, 242, 254, 0.15);
+  --shadow-glow-break: 0 0 20px rgba(217, 70, 239, 0.15);
 }
 ```
 
 ---
 
-## 3. Typography & UI Accents
+## 2. Page Layout Architectures
 
-*   **Header / Timer Fonts**: `Space Grotesk` or `Outfit` (modern, geometric fonts that feel clean, crisp, and high-tech).
-*   **Body / Controls Fonts**: `Inter` or standard UI sans-serif.
-*   **Scale**:
-    *   Countdown Timer: `font-medium tabular-nums text-6xl md:text-7xl`
-    *   Section Headers: `font-semibold tracking-tight text-xl text-text-primary`
-    *   Daily Stats / Standup Blocks: `font-medium text-sm`
+The full-stack application includes three core page views:
+
+### A. Authentication Shell (`/login` & `/register`)
+*   **Aesthetics**: A centered glassmorphic card (`max-w-md`) with high blur background and a thin glowing border, placed over a slowly spinning background radial gradient.
+*   **Controls**: Input fields use dark, translucent backgrounds with cyan borders on focus. Validation errors trigger a soft red pulse.
+
+### B. Core Dashboard (`/`)
+A responsive multi-column layout optimized for widescreen and mobile:
+*   **Left Section (Timer & Audio Mixer)**: 
+    *   Features the large circular Pomodoro progress ring.
+    *   Audio mixer sliders with glowing track fills.
+    *   Status header displaying the user's active session mode.
+*   **Right Section (Standup & Timeline)**:
+    *   Toggle layout to switch between **Logs Timeline** and **Standup Generator**.
+    *   Translucent timeline cards displaying accomplishment logs.
+
+### C. Co-Working Lounge (`/lounge` or Dashboard Side-Panel)
+*   **Grid layout**: Displays cards representing online co-workers.
+*   **User Card Design**:
+    *   Translucent card showing user avatar, username, and state tag.
+    *   A pulsing status dot indicating their active state:
+        *   `● Focusing` in glowing **Cyan** with their countdown timer ticking.
+        *   `● Resting` in glowing **Orchid** with break timer countdown.
+        *   `● Idle` in solid **Gray**.
 
 ---
 
-## 4. Responsive Layout Strategy
-
-The application layout shifts smoothly based on screen widths (Mobile-first design):
-
-*   **Mobile Screens (< 768px)**:
-    *   Single-column stack.
-    *   The Timer sits prominently at the top.
-    *   The Audio Mixer and Log Timeline are hidden inside collapsible glass accordions or stacked vertically to avoid scrolling fatigue.
-    *   Input controls use large, touch-safe tap zones (minimum `44px` height).
-*   **Desktop Screens (>= 768px)**:
-    *   Two-column grid layout with a shared 1200px max-width wrapper.
-    *   **Left Column (50%)**: Houses the interactive circular countdown timer, core operation buttons (Start, Pause, Reset), and the ambient audio mixer.
-    *   **Right Column (50%)**: Displays the Daily standup formatter dashboard and the vertical timeline of completed focus logs.
+## 3. Custom Charts & Data Visuals
+*   We use custom responsive SVGs for analytics to avoid heavy charting libraries:
+    *   **Activity Heatmap**: A compact grid of squares indicating focus sessions completed per day.
+    *   **Category Ring**: An SVG donut chart showing percentage distribution of work categories (Coding, Debugging, Design, etc.) with custom hover slices.
 
 ---
 
-## 5. UI Elements & Styling
-
-*   **Translucent Cards**:
+## 4. UI Animations & Micro-Interactions
+*   **Pulsing Status Dots**: Active co-workers' status indicators use CSS keyframe animations:
     ```css
-    .glass-card {
-      background: var(--card-surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-card);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    @keyframes status-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(0, 242, 254, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0); }
+    }
+    .pulse-focus {
+      animation: status-pulse 2s infinite;
     }
     ```
-*   **Audio Mix Slider**: Custom styling for range input tracks to match the glowing glass aesthetics (thin cyan lines, glowing circular thumbs).
-*   **Status Indicators**: Category tags (`Coding`, `Debugging`, etc.) have soft, desaturated background fills with vibrant borders and white text.
-
----
-
-## 6. Animations & Micro-Interactions
-
-*   **Breathing Glow**: The timer background glows with a gentle pulse (`transform: scale()`, opacity variation) synced to an 8-second breathing cycle during focus sessions to promote deep focus.
-*   **Circular Progress Offset**: The countdown SVG ring uses CSS `stroke-dashoffset` for smooth frame-by-frame depletion as time passes:
-    ```css
-    .timer-ring-circle {
-      transition: stroke-dashoffset 1s linear;
-    }
-    ```
-*   **Modal Slide-In**: The micro-journal overlay animates with a spring-like slide-up and fade-in from the bottom of the screen (`transform: translateY(20px) -> 0`, `opacity: 0 -> 1`).
-*   **Confetti Spark**: Copying the standup text triggers a brief, canvas-free SVG particle blast or CSS scaling animation on the copy button to signal success.
+*   **Confetti Action**: Copying the standup triggers a `canvas-confetti` explosion over the dashboard.

@@ -1,6 +1,6 @@
-# Project Planning & Roadmap - Mindflow
+# Project Planning & Roadmap - Mindflow (Co-Working Edition)
 
-This document indexes all documentation files for **Mindflow** and lists the roadmap for incremental phase completions.
+This document indexes all documentation files for the full-stack edition of **Mindflow** and lists the roadmap for incremental phase completions.
 
 ---
 
@@ -8,62 +8,55 @@ This document indexes all documentation files for **Mindflow** and lists the roa
 
 - **Product Requirements**: Read functional and scope specs in [PRD.md](./PRD.md).
 - **UI/UX Design**: Read color, typography, responsive guidelines, and styling setups in [DESIGN.md](./DESIGN.md).
-- **System Architecture**: Read engineering stack choices and directory layouts in [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md).
+- **System Architecture**: Read database models and file directories in [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md).
 - **Verification Plan**: Read testing steps and criteria in [VALIDATION_RESULTS.md](./VALIDATION_RESULTS.md).
 
 ---
 
 ## 2. Development Roadmap
 
-### Phase 1: Foundation & Project Bootstrapping
-*   [ ] Initialize a Vite + React + TypeScript app in the `/mindflow` folder.
+### Phase 1: Next.js & Prisma Bootstrap
+*   [ ] Initialize a Next.js (App Router, TypeScript) boilerplate inside the `/mindflow` folder.
 *   [ ] Set up global configuration files (`tsconfig.json`, `package.json`, `.gitignore`).
-*   [ ] Configure Google Fonts (`Outfit` and `Inter`) and load custom css variables inside `src/index.css`.
-*   [ ] Set up basic app layout with a placeholder glassmorphic grid.
+*   [ ] Initialize Prisma: `npx prisma init`. Write schema models (`User`, `FocusLog`).
+*   [ ] Set up google fonts and css variables in `globals.css`.
 
-### Phase 2: Core Focus Timer & Persistence
-*   [ ] Build the circular SVG timer component (`Timer.tsx`) with dynamic dash offsets.
-*   [ ] Implement Pomodoro timer hooks tracking seconds, session modes (`focus`, `break`, `idle`).
-*   [ ] Sync active timer states to `localStorage` to ensure reload resilience.
-*   [ ] Add basic start, pause, reset, and skip triggers.
+### Phase 2: Database Setup & Connections
+*   [ ] Provision a free PostgreSQL database on Supabase.
+*   [ ] Set up local `.env` and `.env.local` containing Supabase URL, Anon Key, and Database connection strings.
+*   [ ] Execute database push: `npx prisma db push` to generate tables.
+*   [ ] Verify Prisma connection pool by running a test script or launching Next.js locally.
 
-### Phase 3: Web Audio Synth & Audio Mixer
-*   [ ] Implement Web Audio API generator in `noiseGenerator.ts` to synthesize brown/white focus noise.
-*   [ ] Setup loop handlers for lofi beats and rain soundscape audio tracks.
-*   [ ] Build `AudioMixer.tsx` with individual volume dials and play/pause controls.
-*   [ ] Connect mixer volumes with the timer states (auto-fade sound on session end).
+### Phase 3: Supabase Authentication
+*   [ ] Setup Supabase Client library helper.
+*   [ ] Build Login and Registration pages (`login/page.tsx` and `register/page.tsx`).
+*   [ ] Implement a root auth listener syncing sessions and redirecting unauthorized visitors to `/login`.
+*   [ ] Build a Sign-out button on the main dashboard.
 
-### Phase 4: Journaling Check-ins
-*   [ ] Build the responsive modal popup (`JournalModal.tsx`) triggering automatically when the timer reaches zero.
-*   [ ] Implement category tag selection controls (`Coding`, `Debugging`, `Design`, etc.).
-*   [ ] Implement the 140-character text area with validation constraints.
-*   [ ] Write logs array to `localStorage` and refresh the dashboard.
+### Phase 4: Focus Timer & Web Audio Synth
+*   [ ] Build the circular SVG timer component (`Timer.tsx`) and hooks.
+*   [ ] Implement Web Audio API synthesizers (`noiseGenerator.ts`) to produce brown focus noise.
+*   [ ] Add loop audio players for lofi beats and rain sounds.
+*   [ ] Build the `AudioMixer.tsx` with gain volume sliders.
 
-### Phase 5: Timeline & Standup Generator
-*   [ ] Build a vertical scrollable timeline (`Timeline.tsx`) visualizer showing daily logs.
-*   [ ] Implement text formatters (`formatters.ts`) compiling raw JSON logs into formatted templates (Slack emojis, Markdown, YTB).
-*   [ ] Build the `StandupPanel.tsx` control panel with markdown preview blocks and one-click copy.
-*   [ ] Hook up `canvas-confetti` success triggers upon clipboard copier actions.
+### Phase 5: Accomplishment Logs & API Writing
+*   [ ] Create Next.js API route (`api/logs/route.ts`) to write logs to PostgreSQL using Prisma.
+*   [ ] Build the journal overlay modal (`JournalModal.tsx`) triggering automatically when the timer reaches zero.
+*   [ ] Implement character validation (140 chars max) and category tagging.
+*   [ ] Save focus log upon submission and refresh local dashboard states.
 
-### Phase 6: Wellness Break Guide
-*   [ ] Create `WellnessGuide.tsx` which activates during break cycles.
-*   [ ] Design a smooth SVG morphing breathing guide that expanding/shrinking dynamically on an 8-second breathing loop.
-*   [ ] Add physical stretching prompt tags to encourage user ergonomics.
+### Phase 6: Timeline & Standup Generator
+*   [ ] Build `Timeline.tsx` displaying the user's completed focus logs chronologically.
+*   [ ] Write text compilers (`formatters.ts`) for Slack emoji lists, Markdown list, and YTB templates.
+*   [ ] Create `StandupPanel.tsx` displaying output previews and click-to-copy button.
+*   [ ] Mount `canvas-confetti` success triggers.
 
-### Phase 7: Polish, Responsive Design & Deploy
-*   [ ] Audit mobile layout responsiveness (<768px viewports).
-*   * [ ] Clean up hover, focus, active states, range slider thumb visuals, and dialog overlays.
-*   [ ] Deploy to Vercel/Netlify.
-*   [ ] Create the project README.md guiding local runners and reviewers.
+### Phase 7: Co-Focusing Lounge (Real-Time Presence)
+*   [ ] Setup Supabase Realtime channel subscriptions on mount.
+*   [ ] Track local presence state: broadcast username, status (`focus` | `break` | `idle`), and timer `secondsLeft`.
+*   [ ] Listen to state updates from other connected clients and display them dynamically in `CoWorkingLounge.tsx`.
 
----
-
-## 3. Git Commit Strategy
-
-We will use conventional, clean, and granular commits to document our build steps in the Git history:
-*   `feat(timer): build circular SVG pomodoro countdown and sync state to localStorage`
-*   `feat(audio): integrate Web Audio API brown noise synthesizer and mixer panel`
-*   `feat(journal): implement slide-in modal check-in and category tags`
-*   `feat(standup): write standup preview formatters and copy-to-clipboard actions`
-*   `style: design glassmorphic dark mode theme and dynamic glows`
-*   `chore: set up project skeleton and documentation index`
+### Phase 8: Analytics & SVG Heatmaps
+*   [ ] Create dashboard stats panel (`DashboardStats.tsx`).
+*   [ ] Render custom responsive SVG donut charts for categories and cell grid maps for daily heatmaps.
+*   [ ] Conduct responsive design auditing and deploy to Vercel.
