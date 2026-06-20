@@ -48,8 +48,9 @@ export default function LoginPage() {
 
       router.replace("/");
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg("An unexpected error occurred. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
+      setErrorMsg(message);
       setLoading(false);
     }
   };

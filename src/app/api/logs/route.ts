@@ -13,8 +13,9 @@ async function authenticate() {
       return { error: `Unauthorized: ${error?.message || 'Invalid session'}`, status: 401 };
     }
     return { user };
-  } catch (err: any) {
-    return { error: `Authentication system failure: ${err.message}`, status: 500 };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { error: `Authentication system failure: ${message}`, status: 500 };
   }
 }
 
@@ -42,8 +43,9 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ logs });
-  } catch (dbError: any) {
-    return NextResponse.json({ error: `Database query failure: ${dbError.message}` }, { status: 500 });
+  } catch (dbError) {
+    const message = dbError instanceof Error ? dbError.message : String(dbError);
+    return NextResponse.json({ error: `Database query failure: ${message}` }, { status: 500 });
   }
 }
 
@@ -102,7 +104,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ log }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: `Failed to create log: ${error.message}` }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: `Failed to create log: ${message}` }, { status: 500 });
   }
 }

@@ -129,7 +129,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
       setMode("break");
       setSecondsLeft(BREAK_DURATION);
       setIsRunning(true);
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       throw e;
     }

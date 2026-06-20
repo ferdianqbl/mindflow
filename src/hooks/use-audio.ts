@@ -42,7 +42,7 @@ export function useAudio() {
     if (audioCtxRef.current) return;
 
     // 1. Create AudioContext
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as unknown as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new AudioContextClass();
     audioCtxRef.current = ctx;
 

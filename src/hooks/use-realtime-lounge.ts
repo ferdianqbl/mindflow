@@ -46,7 +46,7 @@ export function useRealtimeLounge(
           Object.keys(presenceState).forEach((key) => {
             const userPresences = presenceState[key];
             if (userPresences && userPresences.length > 0) {
-              const info = userPresences[0] as any;
+              const info = userPresences[0] as unknown as { email: string; mode: TimerMode; endTime: number | null };
               parsedUsers.push({
                 userId: key,
                 email: info.email,

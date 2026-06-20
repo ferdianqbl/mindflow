@@ -55,8 +55,9 @@ export default function JournalModal({ isOpen, onClose, onSubmit, onSkip }: Jour
       setCategory(null);
       setDescription("");
       onClose();
-    } catch (e: any) {
-      setErrorMsg(e.message || "Failed to log accomplishment.");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to log accomplishment.";
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Code, Bug, Palette, BookOpen, Users, Settings, Timer } from "lucide-react";
+import { Code, Bug, Palette, BookOpen, Users, Settings, Timer, type LucideIcon } from "lucide-react";
 import { CATEGORY_EMOJIS, CATEGORY_LABELS } from "@/utils/formatters";
 import { WorkCategory } from "@/components/journal-modal";
 
@@ -19,7 +19,7 @@ interface TimelineProps {
 }
 
 export default function Timeline({ logs, loading }: TimelineProps) {
-  const categoryConfig: Record<WorkCategory, { icon: any; color: string; bg: string }> = {
+  const categoryConfig: Record<WorkCategory, { icon: LucideIcon; color: string; bg: string }> = {
     coding: { icon: Code, color: "text-cyan-400 border-cyan-500/20", bg: "bg-cyan-500/5" },
     debugging: { icon: Bug, color: "text-red-400 border-red-500/20", bg: "bg-red-500/5" },
     design: { icon: Palette, color: "text-pink-400 border-pink-500/20", bg: "bg-pink-500/5" },

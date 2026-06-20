@@ -72,8 +72,9 @@ export default function RegisterPage() {
         setSuccessMsg("Success! Please check your email inbox to confirm your account registration.");
         setLoading(false);
       }
-    } catch (err: any) {
-      setErrorMsg("An unexpected error occurred. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
+      setErrorMsg(message);
       setLoading(false);
     }
   };

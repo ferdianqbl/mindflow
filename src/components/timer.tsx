@@ -47,7 +47,7 @@ export default function Timer({
   // Synthesize a gentle crystal chime notification sound on completion
   const playChime = () => {
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as unknown as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioContextClass();
       const now = ctx.currentTime;
       
