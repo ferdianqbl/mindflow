@@ -18,6 +18,8 @@ We implement Mindflow as a full-stack web application using a modern, serverless
     *   *Rationale*: Secure password hashing on-server via `bcryptjs` and session tokens signed and verified using edge-compatible `jose`. Session tokens are stored in secure, HTTP-only client cookies.
 *   **Real-time Syncer**: **Supabase Realtime (Presence & Broadcast)**
     *   *Rationale*: Connects online users on a shared WebSocket channel to sync Pomodoro states and presence dynamically.
+*   **State Management**: **Zustand**
+    *   *Rationale*: Centralizes timer countdown, accomplishment logs, active modals, and lounge presence into a single global store. Decouples component rendering, eliminates props drilling, and provides a stable state machine for ticking and Supabase syncing.
 
 ---
 
@@ -139,6 +141,8 @@ mindflow/
     │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/
     │   └── use-realtime-lounge.ts # Handles Supabase Realtime channel presence
+    ├── store/
+    │   └── use-mindflow-store.ts # Centralized Zustand global store managing timer, logs, modals, and lounge
     ├── lib/
     │   ├── prisma/
     │   │   └── index.ts        # Prisma Client singleton connecting via pg adapter

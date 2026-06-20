@@ -67,3 +67,7 @@ Unlike passive focus timers, Mindflow requires users to build a session task pla
 *   Uses **Supabase Realtime (Presence & Broadcast)** to track connected client states.
 *   Each user broadcasts their profile username, current state (`focus` | `break` | `idle`), and `secondsLeft` on their timer.
 *   Online user listing updates dynamically.
+
+### Centralized State Management (Zustand)
+*   State variables (timer mode, duration settings, active ticking countdown, modals visibilities, timeline accomplishments log feed, and active co-workers presence lounge list) are centralized in a single store.
+*   Components read state reactively and dispatch store actions synchronously, ensuring high-frequency timer ticks and lobby updates remain performant and error-free.

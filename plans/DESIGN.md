@@ -75,6 +75,8 @@ A responsive multi-column layout optimized for widescreen and mobile:
 
 ## 3. Session Planning & Validation Modals
 
+*   **State Synchronization (Zustand)**:
+    *   All modal visibilities (`isPlanModalOpen`, `isValidateModalOpen`, `isJournalOpen`) and Pomodoro modes are synchronized using a central store (`useMindflowStore`), avoiding prop-drilling and ensuring that state changes are reflected in real-time across widgets.
 *   **PlanModal Layout**:
     *   Triggers when starting a new session from `idle` state.
     *   Glassmorphic grid list allowing task-by-task inputs: name, category dropdown, and duration.

@@ -8,7 +8,7 @@ Mindflow is a premium full-stack web dashboard that combines an ambient Pomodoro
 
 ### Prerequisites
 *   Node.js (LTS version)
-*   A Supabase project (providing a PostgreSQL database and Auth)
+*   A Supabase project (providing a PostgreSQL database and Realtime presence)
 
 ### 1. Clone & Install Dependencies
 ```bash
@@ -60,7 +60,7 @@ Remote builders suffer from context-switching and forget their daily accomplishm
 Standard Pomodoro apps exist, but they are passive and don't record outcomes. Heavy project tools (Trello, Jira) track project states, not personal time blocks or reflections. Notes apps require manual formatting. We built Mindflow to combine focus acoustics, active reflection prompts, and automated markdown compilation into a single, cohesive interface.
 
 ### 5. What you put in scope, what you left out, and why
-*   **In Scope**: Glassmorphic dark UI, Web Audio API brown noise synthesizer (requires zero CPU/bandwidth), Supabase Auth/Cookies session middleware, database logging (Prisma + Postgres), a real-time Co-working presence lounge, and Slack/YTB formatters.
+*   **In Scope**: Glassmorphic dark UI, self-hosted Custom JWT Cookie Authentication (`bcryptjs` + `jose`), database logging (Prisma + Postgres), a real-time Co-working presence lounge, Zustand centralized global state management, and Slack/YTB/Markdown formatters.
 *   **Left Out**: OAuth integrations (Google/GitHub login) to avoid API keys setup friction for local review, and calendar synced timelines.
 
 ### 6. Where you didn't have answers, what you assumed

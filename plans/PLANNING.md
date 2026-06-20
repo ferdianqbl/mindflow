@@ -66,3 +66,9 @@ This document indexes all documentation files for the full-stack edition of **Mi
 *   [x] Implement `/api/plans` and `/api/plans/validate` handlers to fetch, sync, and check off task plans.
 *   [x] Build `PlanModal` and `ValidateModal` components.
 *   [x] Refactor dashboard client and timer control flows to require planning and validation.
+
+### Phase 10: Centralized State Management with Zustand
+*   [x] Install `zustand` state management package.
+*   [x] Implement `src/store/use-mindflow-store.ts` managing Pomodoro timer, timeline logs, modal visibilities, and presence lobby.
+*   [x] Refactor hooks and components (`use-realtime-lounge.ts`, `dashboard-client.tsx`, `timer.tsx`) to bind to the store.
+*   [x] Verify Next.js build compilation and push update commits to remote repository.

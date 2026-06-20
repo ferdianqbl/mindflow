@@ -1,11 +1,11 @@
-import { create } from "zustand";
-import { TimerMode } from "@/components/timer";
-import { FocusLogItem } from "@/components/timeline";
-import { LoungeUser } from "@/hooks/use-realtime-lounge";
 import { WorkCategory } from "@/components/journal-modal";
+import { FocusLogItem } from "@/components/timeline";
+import { TimerMode } from "@/components/timer";
+import { LoungeUser } from "@/hooks/use-realtime-lounge";
+import { create } from "zustand";
 
 export const FOCUS_DURATION = 25 * 60; // 25 minutes
-export const BREAK_DURATION = 5 * 60;  // 5 minutes
+export const BREAK_DURATION = 5 * 60; // 5 minutes
 
 interface MindflowState {
   // Timer States
@@ -55,7 +55,9 @@ interface MindflowState {
   submitLog: (category: WorkCategory, description: string) => Promise<void>;
 
   // Session Plan Handlers
-  startSession: (plans: Array<{ title: string; category: string; durationMin: number }>) => Promise<void>;
+  startSession: (
+    plans: Array<{ title: string; category: string; durationMin: number }>,
+  ) => Promise<void>;
   validateSession: (completedIds: string[]) => Promise<void>;
 }
 
@@ -90,7 +92,7 @@ export const useMindflowStore = create<MindflowState>((set, get) => ({
 
   // Timer Handlers
   start: () => {
-    const { mode, isRunning } = get();
+    const { mode } = get();
     if (mode === "idle") {
       set({ isPlanModalOpen: true });
       return;
