@@ -22,8 +22,8 @@ This document indexes all documentation files for the full-stack edition of **Mi
 *   [ ] Set up google fonts and css variables in `globals.css`.
 
 ### Phase 2: Database Setup & Connections
-*   [ ] Provision a free PostgreSQL database on Supabase.
-*   [ ] Set up local `.env` and `.env.local` containing Supabase URL, Anon Key, and Database connection strings.
+*   [ ] Create Supabase project and get database connection strings.
+*   [ ] Configure environment files (`.env`, `.env.local`) containing Supabase URL, Anon Key, and Database connection strings.
 *   [ ] Execute database push: `npx prisma db push` to generate tables.
 *   [ ] Verify Prisma connection pool by running a test script or launching Next.js locally.
 
@@ -34,29 +34,29 @@ This document indexes all documentation files for the full-stack edition of **Mi
 *   [ ] Build a Sign-out button on the main dashboard.
 
 ### Phase 4: Focus Timer & Web Audio Synth
-*   [ ] Build the circular SVG timer component (`Timer.tsx`) and hooks.
-*   [ ] Implement Web Audio API synthesizers (`noiseGenerator.ts`) to produce brown focus noise.
+*   [ ] Build the circular SVG timer component (`timer.tsx`) and hooks.
+*   [ ] Implement Web Audio API synthesizers (`noise-generator.ts`) to produce brown focus noise.
 *   [ ] Add loop audio players for lofi beats and rain sounds.
-*   [ ] Build the `AudioMixer.tsx` with gain volume sliders.
+*   [ ] Build the `audio-mixer.tsx` with gain volume sliders.
 
 ### Phase 5: Accomplishment Logs & API Writing
 *   [ ] Create Next.js API route (`api/logs/route.ts`) to write logs to PostgreSQL using Prisma.
-*   [ ] Build the journal overlay modal (`JournalModal.tsx`) triggering automatically when the timer reaches zero.
+*   [ ] Build the journal overlay modal (`journal-modal.tsx`) triggering automatically when the timer reaches zero.
 *   [ ] Implement character validation (140 chars max) and category tagging.
 *   [ ] Save focus log upon submission and refresh local dashboard states.
 
 ### Phase 6: Timeline & Standup Generator
-*   [ ] Build `Timeline.tsx` displaying the user's completed focus logs chronologically.
+*   [ ] Build `timeline.tsx` displaying the user's completed focus logs chronologically.
 *   [ ] Write text compilers (`formatters.ts`) for Slack emoji lists, Markdown list, and YTB templates.
-*   [ ] Create `StandupPanel.tsx` displaying output previews and click-to-copy button.
+*   [ ] Create `standup-panel.tsx` displaying output previews and click-to-copy button.
 *   [ ] Mount `canvas-confetti` success triggers.
 
 ### Phase 7: Co-Focusing Lounge (Real-Time Presence)
 *   [ ] Setup Supabase Realtime channel subscriptions on mount.
 *   [ ] Track local presence state: broadcast username, status (`focus` | `break` | `idle`), and timer `secondsLeft`.
-*   [ ] Listen to state updates from other connected clients and display them dynamically in `CoWorkingLounge.tsx`.
+*   [ ] Listen to state updates from other connected clients and display them dynamically in `co-working-lounge.tsx`.
 
 ### Phase 8: Analytics & SVG Heatmaps
-*   [ ] Create dashboard stats panel (`DashboardStats.tsx`).
+*   [ ] Create dashboard stats panel (`dashboard-stats.tsx`).
 *   [ ] Render custom responsive SVG donut charts for categories and cell grid maps for daily heatmaps.
 *   [ ] Conduct responsive design auditing and deploy to Vercel.

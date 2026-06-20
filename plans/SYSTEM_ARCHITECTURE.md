@@ -64,7 +64,7 @@ model FocusLog {
 
 ## 3. Directory Layout
 
-The codebase is organized modularly under the Next.js App Router structure:
+All filenames and folders are structured in **kebab-case** to maintain project consistency:
 
 ```
 mindflow/
@@ -88,21 +88,21 @@ mindflow/
     │   └── api/                # API routes
     │       └── logs/
     │           └── route.ts    # GET (fetch user logs) & POST (write log)
-    ├── components/
-    │   ├── Timer.tsx           # Countdown circular SVG timer
-    │   ├── AudioMixer.tsx      # Soundboard volume dials
-    │   ├── JournalModal.tsx    # Slide-in accomplishment journal form
-    │   ├── Timeline.tsx        # Chronicled timeline of focus blocks
-    │   ├── StandupPanel.tsx    # Copy standup format selectors
-    │   ├── WellnessGuide.tsx   # Breathing circle guide for breaks
-    │   ├── DashboardStats.tsx  # Heatmaps & percentage donut charts
-    │   └── CoWorkingLounge.tsx # Real-time lobby list of online users
+    ├── components/             # Kebab-case filenames
+    │   ├── timer.tsx           # Countdown circular SVG timer
+    │   ├── audio-mixer.tsx     # Soundboard volume dials
+    │   ├── journal-modal.tsx   # Slide-in accomplishment journal form
+    │   ├── timeline.tsx        # Chronicled timeline of focus blocks
+    │   ├── standup-panel.tsx   # Copy standup format selectors
+    │   ├── wellness-guide.tsx  # Breathing circle guide for breaks
+    │   ├── dashboard-stats.tsx # Heatmaps & percentage donut charts
+    │   └── co-working-lounge.tsx # Real-time lobby list of online users
     ├── hooks/
-    │   ├── useAudio.ts         # Handles noise synth and lofi loops
-    │   └── useRealtimeLounge.ts # Handles Supabase Realtime channel presence
+    │   ├── use-audio.ts        # Handles noise synth and lofi loops
+    │   └── use-realtime-lounge.ts # Handles Supabase Realtime channel presence
     └── utils/
         ├── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
-        ├── noiseGenerator.ts   # Synthesizes brown frequency noise
+        ├── noise-generator.ts  # Synthesizes brown frequency noise
         ├── prisma.ts           # Shared PrismaClient instance helper
         └── supabase.ts         # Supabase client initializer for Auth & Realtime
 ```
