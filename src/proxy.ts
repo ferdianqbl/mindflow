@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   // Automatically refreshes the session and sets cookies
   return createClient(request);
 }
