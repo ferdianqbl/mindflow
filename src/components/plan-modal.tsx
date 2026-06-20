@@ -1,7 +1,20 @@
 "use client";
 
+import {
+  BookOpen,
+  Bug,
+  Clock,
+  Code,
+  Palette,
+  Play,
+  Plus,
+  Settings,
+  Sparkles,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { X, Plus, Trash2, Play, Sparkles, Clock, Code, Bug, Palette, BookOpen, Users, Settings } from "lucide-react";
 import { WorkCategory } from "./journal-modal";
 
 interface LocalPlanItem {
@@ -17,43 +30,51 @@ interface PlanModalProps {
   onStartSession: (plans: Omit<LocalPlanItem, "id">[]) => Promise<void>;
 }
 
-export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModalProps) {
+export default function PlanModal({
+  isOpen,
+  onClose,
+  onStartSession,
+}: PlanModalProps) {
   const [plans, setPlans] = useState<LocalPlanItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Fetch carry-over incomplete plans on open
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  // Reset state on open transition before rendering/committing
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setErrorMsg("");
       setLoading(true);
-      fetch("/api/plans")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.plans && data.plans.length > 0) {
-            setPlans(
-              data.plans.map((p: any) => ({
-                id: p.id,
-                title: p.title,
-                category: p.category as WorkCategory,
-                durationMin: p.durationMin,
-              }))
-            );
-          } else {
-            // Default first plan item if no carry-over plans exist
-            setPlans([
-              {
-                id: Math.random().toString(),
-                title: "",
-                category: "coding",
-                durationMin: 25,
-              },
-            ]);
-          }
-        })
-        .catch((err) => {
-          console.error("Failed to fetch carry-over plans:", err);
-          // Fallback to one empty plan item
+    }
+  }
+
+  interface ApiPlanItem {
+    id: string;
+    title: string;
+    category: string;
+    durationMin: number;
+  }
+
+  // Fetch carry-over incomplete plans on open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetch("/api/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.plans && data.plans.length > 0) {
+          setPlans(
+            data.plans.map((p: ApiPlanItem) => ({
+              id: p.id,
+              title: p.title,
+              category: p.category as WorkCategory,
+              durationMin: p.durationMin,
+            })),
+          );
+        } else {
+          // Default first plan item if no carry-over plans exist
           setPlans([
             {
               id: Math.random().toString(),
@@ -62,11 +83,24 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
               durationMin: 25,
             },
           ]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load plans", err);
+        setErrorMsg("Failed to load carry-over plans");
+        // Fallback to one empty plan item
+        setPlans([
+          {
+            id: Math.random().toString(),
+            title: "",
+            category: "coding",
+            durationMin: 25,
+          },
+        ]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -92,19 +126,23 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
     setPlans(plans.filter((p) => p.id !== id));
   };
 
-  const handleUpdatePlan = (id: string, field: keyof LocalPlanItem, value: any) => {
+  const handleUpdatePlan = (
+    id: string,
+    field: keyof LocalPlanItem,
+    value: string | number,
+  ) => {
     setErrorMsg("");
     setPlans(
       plans.map((p) => {
         if (p.id === id) {
           if (field === "durationMin") {
-            const num = parseInt(value, 10);
+            const num = typeof value === "number" ? value : parseInt(value, 10);
             return { ...p, durationMin: isNaN(num) ? 0 : num };
           }
           return { ...p, [field]: value };
         }
         return p;
-      })
+      }),
     );
   };
 
@@ -139,7 +177,8 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
       await onStartSession(formattedPlans);
       onClose();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to start session.";
+      const msg =
+        err instanceof Error ? err.message : "Failed to start session.";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -160,7 +199,10 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Translucent Backdrop blur */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
+        onClick={onClose}
+      />
 
       {/* Modal Dialog Card */}
       <div className="relative z-10 w-full max-w-2xl transform rounded-[28px] border border-white/10 bg-[#0d1325]/90 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300 scale-100 max-h-[85vh] flex flex-col">
@@ -173,26 +215,30 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
         </button>
 
         {/* Modal Header */}
-        <div className="mb-6 mt-2 flex-shrink-0">
+        <div className="mb-6 mt-2 shrink-0">
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-cyan-400" />
-            <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold bg-linear-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
               Plan Your Focus Session
             </h2>
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            List the tasks you plan to accomplish during this focus block. Unfinished tasks will carry over.
+            List the tasks you plan to accomplish during this focus block.
+            Unfinished tasks will carry over.
           </p>
         </div>
 
         {errorMsg && (
-          <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-xs font-semibold text-red-400 flex-shrink-0">
+          <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-xs font-semibold text-red-400 shrink-0">
             {errorMsg}
           </div>
         )}
 
         {/* Form Container (Scrollable) */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 flex flex-col overflow-hidden"
+        >
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
             {loading && plans.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-2">
@@ -216,7 +262,9 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
                       type="text"
                       placeholder="What are you working on?"
                       value={plan.title}
-                      onChange={(e) => handleUpdatePlan(plan.id, "title", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdatePlan(plan.id, "title", e.target.value)
+                      }
                       className="w-full rounded-xl border border-white/5 bg-slate-950/40 px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-all duration-200 focus:border-cyan-500/30"
                     />
                   </div>
@@ -225,11 +273,21 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
                   <div className="w-full md:w-44">
                     <select
                       value={plan.category}
-                      onChange={(e) => handleUpdatePlan(plan.id, "category", e.target.value as WorkCategory)}
+                      onChange={(e) =>
+                        handleUpdatePlan(
+                          plan.id,
+                          "category",
+                          e.target.value as WorkCategory,
+                        )
+                      }
                       className="w-full rounded-xl border border-white/5 bg-slate-950/40 px-3.5 py-2.5 text-xs text-slate-300 outline-none transition-all duration-200 focus:border-cyan-500/30 cursor-pointer"
                     >
                       {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id} className="bg-[#0f172a] text-slate-300">
+                        <option
+                          key={cat.id}
+                          value={cat.id}
+                          className="bg-[#0f172a] text-slate-300"
+                        >
                           {cat.name}
                         </option>
                       ))}
@@ -238,23 +296,27 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
 
                   {/* Duration Input */}
                   <div className="flex items-center space-x-2 w-full md:w-28">
-                    <Clock className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                    <Clock className="h-4 w-4 text-slate-500 shrink-0" />
                     <input
                       type="number"
                       min="1"
                       max="180"
                       value={plan.durationMin || ""}
-                      onChange={(e) => handleUpdatePlan(plan.id, "durationMin", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdatePlan(plan.id, "durationMin", e.target.value)
+                      }
                       className="w-full rounded-xl border border-white/5 bg-slate-950/40 px-3 py-2.5 text-center text-xs text-slate-200 outline-none transition-all duration-200 focus:border-cyan-500/30"
                     />
-                    <span className="text-[10px] text-slate-500 font-medium">min</span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      min
+                    </span>
                   </div>
 
                   {/* Trash/Remove Button */}
                   <button
                     type="button"
                     onClick={() => handleRemovePlan(plan.id)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/10 bg-red-500/5 text-red-400 outline-none transition-all duration-200 hover:bg-red-500/15 hover:text-red-300 active:scale-95 flex-shrink-0"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/10 bg-red-500/5 text-red-400 outline-none transition-all duration-200 hover:bg-red-500/15 hover:text-red-300 active:scale-95 shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -264,14 +326,16 @@ export default function PlanModal({ isOpen, onClose, onStartSession }: PlanModal
           </div>
 
           {/* Modal Footer */}
-          <div className="mt-6 pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 flex-shrink-0">
+          <div className="mt-6 pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 shrink-0">
             {/* Session Info */}
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1.5 rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400 border border-cyan-500/20">
                 <Clock className="h-3.5 w-3.5" />
                 <span>Total: {totalDuration} min</span>
               </div>
-              <span className="text-[10px] text-slate-500">Focus duration automatically updates</span>
+              <span className="text-[10px] text-slate-500">
+                Focus duration automatically updates
+              </span>
             </div>
 
             {/* Actions */}

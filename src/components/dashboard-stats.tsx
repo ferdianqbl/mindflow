@@ -200,7 +200,7 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
                     stroke="rgba(255, 255, 255, 0.02)"
                     strokeWidth="14"
                   />
-                  {chartData.map((slice, i) => {
+                  {chartData.map((slice) => {
                     const strokeDashoffset =
                       circumference - (slice.percentage / 100) * circumference;
                     return (
@@ -301,7 +301,7 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
           <div className="mt-4 flex items-center justify-between text-[10px] text-slate-500">
             <span>Less active</span>
             <div className="flex items-center space-x-1.5">
-              <span className="h-3 w-3 rounded border border-white/[0.01] bg-slate-900" />
+              <span className="h-3 w-3 rounded border border-white/1 bg-slate-900" />
               <span className="h-3 w-3 rounded border border-cyan-800/20 bg-cyan-950/60" />
               <span className="h-3 w-3 rounded border border-cyan-400/30 bg-cyan-500/40" />
               <span className="h-3 w-3 rounded border border-cyan-300/40 bg-cyan-400" />

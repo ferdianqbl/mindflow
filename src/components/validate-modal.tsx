@@ -20,6 +20,13 @@ interface ValidateModalProps {
   onSkip: () => void;
 }
 
+interface ApiPlanItem {
+  id: string;
+  title: string;
+  category: string;
+  durationMin: number;
+}
+
 export default function ValidateModal({
   isOpen,
   onClose,
@@ -31,35 +38,44 @@ export default function ValidateModal({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Load incomplete plans to validate
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  // Reset state on open transition before rendering/committing
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setErrorMsg("");
       setLoading(true);
-      fetch("/api/plans")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.plans) {
-            setPlans(
-              data.plans.map((p: any) => ({
-                id: p.id,
-                title: p.title,
-                category: p.category as WorkCategory,
-                durationMin: p.durationMin,
-              }))
-            );
-            // Default to marking all tasks completed
-            setCompletedIds(data.plans.map((p: any) => p.id));
-          }
-        })
-        .catch((err) => {
-          console.error("Failed to load plans for validation:", err);
-          setErrorMsg("Could not fetch active tasks to review.");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
     }
+  }
+
+  // Load incomplete plans to validate
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetch("/api/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.plans) {
+          setPlans(
+            data.plans.map((p: ApiPlanItem) => ({
+              id: p.id,
+              title: p.title,
+              category: p.category as WorkCategory,
+              durationMin: p.durationMin,
+            }))
+          );
+          // Default to marking all tasks completed
+          setCompletedIds(data.plans.map((p: ApiPlanItem) => p.id));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load plans for validation:", err);
+        setErrorMsg("Could not fetch active tasks to review.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [isOpen]);
 
   if (!isOpen) return null;

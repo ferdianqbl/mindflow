@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Users, Flame, Coffee, Moon } from "lucide-react";
 import { LoungeUser } from "@/hooks/use-realtime-lounge";
+import { Coffee, Flame, Moon, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface CoWorkingLoungeProps {
   coWorkers: LoungeUser[];
@@ -17,16 +17,24 @@ export default function CoWorkingLounge({ coWorkers }: CoWorkingLoungeProps) {
           <Users className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-slate-100">Co-Working Lounge</h2>
-          <p className="text-xs text-slate-400">See who is focusing in real-time</p>
+          <h2 className="text-lg font-semibold text-slate-100">
+            Co-Working Lounge
+          </h2>
+          <p className="text-xs text-slate-400">
+            See who is focusing in real-time
+          </p>
         </div>
       </div>
 
       {/* Online Users List */}
       {coWorkers.length === 0 ? (
         <div className="flex h-36 flex-col items-center justify-center rounded-2xl border border-dashed border-white/5 bg-slate-950/10 p-4 text-center">
-          <p className="text-xs text-slate-500 font-medium">No other co-workers online</p>
-          <p className="mt-1 text-[10px] text-slate-600">Open this app in another window/device to see active syncs.</p>
+          <p className="text-xs text-slate-500 font-medium">
+            No other co-workers online
+          </p>
+          <p className="mt-1 text-[10px] text-slate-600">
+            Open this app in another window/device to see active syncs.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -48,7 +56,9 @@ const getSecondsRemaining = (endTime: number | null) => {
 // Sub-component to manage its own tick interval for other users' timers
 function CoWorkerCard({ worker }: { worker: LoungeUser }) {
   const [prevEndTime, setPrevEndTime] = useState<number | null>(worker.endTime);
-  const [secondsLeft, setSecondsLeft] = useState<number>(() => getSecondsRemaining(worker.endTime));
+  const [secondsLeft, setSecondsLeft] = useState<number>(() =>
+    getSecondsRemaining(worker.endTime),
+  );
 
   // Adjust state during rendering when prop changes to avoid cascading renders
   if (worker.endTime !== prevEndTime) {
@@ -107,19 +117,28 @@ function CoWorkerCard({ worker }: { worker: LoungeUser }) {
   const StatusIcon = config.icon;
 
   return (
-    <div className={`flex items-center justify-between rounded-2xl border px-4 py-3.5 transition-all duration-300 hover:border-white/10 ${config.color}`}>
-      
+    <div
+      className={`flex items-center justify-between rounded-2xl border px-4 py-3.5 transition-all duration-300 hover:border-white/10 ${config.color}`}
+    >
       {/* User Info & State */}
       <div className="flex items-center space-x-3.5">
         {/* Glowing Pulse status dot */}
         <div className="relative flex h-2.5 w-2.5">
-          <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${config.pulse}`} />
-          <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${config.dot}`} />
+          <span
+            className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${config.pulse}`}
+          />
+          <span
+            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${config.dot}`}
+          />
         </div>
-        
+
         <div>
-          <h4 className="text-sm font-semibold text-slate-200 capitalize">{worker.username}</h4>
-          <div className={`mt-0.5 flex items-center space-x-1 text-[10px] font-bold uppercase tracking-wider ${config.textColor}`}>
+          <h4 className="text-sm font-semibold text-slate-200 capitalize">
+            {worker.username}
+          </h4>
+          <div
+            className={`mt-0.5 flex items-center space-x-1 text-[10px] font-bold uppercase tracking-wider ${config.textColor}`}
+          >
             <StatusIcon className="h-3 w-3" />
             <span>{config.text}</span>
           </div>
@@ -128,7 +147,7 @@ function CoWorkerCard({ worker }: { worker: LoungeUser }) {
 
       {/* Localized Timer Countdown */}
       {secondsLeft > 0 && (
-        <div className="rounded-lg bg-slate-950/40 px-2.5 py-1 font-mono text-xs font-semibold text-slate-300 tabular-nums shadow-inner border border-white/[0.02]">
+        <div className="rounded-lg bg-slate-950/40 px-2.5 py-1 font-mono text-xs font-semibold text-slate-300 tabular-nums shadow-inner border border-white/2">
           {formatTime(secondsLeft)}
         </div>
       )}

@@ -1,19 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import { ClipboardList, History, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { LogOut, LayoutDashboard, History, ClipboardList, Coffee } from "lucide-react";
+import { useCallback, useState } from "react";
 
 // Components & Hooks import
-import Timer, { TimerMode, FOCUS_DURATION, BREAK_DURATION } from "@/components/timer";
-import JournalModal, { WorkCategory } from "@/components/journal-modal";
-import Timeline, { FocusLogItem } from "@/components/timeline";
-import StandupPanel from "@/components/standup-panel";
-import WellnessGuide from "@/components/wellness-guide";
-import DashboardStats from "@/components/dashboard-stats";
 import CoWorkingLounge from "@/components/co-working-lounge";
+import DashboardStats from "@/components/dashboard-stats";
+import JournalModal, { WorkCategory } from "@/components/journal-modal";
 import PlanModal from "@/components/plan-modal";
+import StandupPanel from "@/components/standup-panel";
+import Timeline, { FocusLogItem } from "@/components/timeline";
+import Timer, {
+  BREAK_DURATION,
+  FOCUS_DURATION,
+  TimerMode,
+} from "@/components/timer";
 import ValidateModal from "@/components/validate-modal";
+import WellnessGuide from "@/components/wellness-guide";
 
 import { useRealtimeLounge } from "@/hooks/use-realtime-lounge";
 
@@ -22,9 +26,12 @@ interface DashboardClientProps {
   initialLogs: FocusLogItem[];
 }
 
-export default function DashboardClient({ user, initialLogs }: DashboardClientProps) {
+export default function DashboardClient({
+  user,
+  initialLogs,
+}: DashboardClientProps) {
   const router = useRouter();
-  
+
   // 1. Core Timer and Logs State
   const [mode, setMode] = useState<TimerMode>("idle");
   const [focusDuration, setFocusDuration] = useState<number>(FOCUS_DURATION);
@@ -38,10 +45,18 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   const [isJournalOpen, setIsJournalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isValidateModalOpen, setIsValidateModalOpen] = useState(false);
-  const [rightPanelTab, setRightPanelTab] = useState<"timeline" | "standup">("timeline");
+  const [rightPanelTab, setRightPanelTab] = useState<"timeline" | "standup">(
+    "timeline",
+  );
 
   // 3. Real-time Co-working Presence Hook
-  const { coWorkers } = useRealtimeLounge(user.id, user.email, mode, secondsLeft, isRunning);
+  const { coWorkers } = useRealtimeLounge(
+    user.id,
+    user.email,
+    mode,
+    secondsLeft,
+    isRunning,
+  );
 
   // 5. Timer Control Actions
   const handleStart = () => {
@@ -50,11 +65,13 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
       setIsPlanModalOpen(true);
       return;
     }
-    
+
     setIsRunning(true);
   };
 
-  const handleStartSession = async (plans: Array<{ title: string; category: string; durationMin: number }>) => {
+  const handleStartSession = async (
+    plans: Array<{ title: string; category: string; durationMin: number }>,
+  ) => {
     // 1. Save plans to DB
     const response = await fetch("/api/plans", {
       method: "POST",
@@ -72,7 +89,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     // 2. Set the focus session duration to the sum of the planned durations
     const totalMinutes = plans.reduce((acc, curr) => acc + curr.durationMin, 0);
     const totalSeconds = totalMinutes * 60;
-    
+
     setFocusDuration(totalSeconds);
     setSecondsLeft(totalSeconds);
     setMode("focus");
@@ -85,7 +102,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   const handleReset = () => {
     setIsRunning(false);
-    
+
     if (mode === "break") {
       setSecondsLeft(breakDuration);
     } else {
@@ -121,13 +138,13 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   };
 
   // Callback triggered when focus timer hits 0
-  const handleFocusComplete = (durationMinutes: number) => {
+  const handleFocusComplete = useCallback(() => {
     setIsRunning(false);
     // Open validation review overlay
     setIsValidateModalOpen(true);
-  };
+  }, []);
 
-  const handleValidationComplete = async (completedCount: number) => {
+  const handleValidationComplete = async () => {
     // Refresh accomplishments
     await refreshLogs();
 
@@ -146,7 +163,10 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   };
 
   // Submit log to database via API
-  const handleSubmitLog = async (data: { category: WorkCategory; description: string }) => {
+  const handleSubmitLog = async (data: {
+    category: WorkCategory;
+    description: string;
+  }) => {
     try {
       const response = await fetch("/api/logs", {
         method: "POST",
@@ -222,10 +242,10 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
           <div className="flex items-center space-x-2.5">
-            <span className="flex h-7.5 w-7.5 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 text-slate-950 font-bold text-base shadow-lg shadow-cyan-500/10">
+            <span className="flex h-7.5 w-7.5 items-center justify-center rounded-lg bg-linear-to-br from-cyan-400 to-blue-500 text-slate-950 font-bold text-base shadow-lg shadow-cyan-500/10">
               M
             </span>
-            <span className="font-sans text-lg font-bold tracking-tight bg-gradient-to-r from-cyan-200 to-slate-200 bg-clip-text text-transparent">
+            <span className="font-sans text-lg font-bold tracking-tight bg-linear-to-r from-cyan-200 to-slate-200 bg-clip-text text-transparent">
               Mindflow
             </span>
           </div>
@@ -233,7 +253,9 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
           {/* User Section */}
           <div className="flex items-center space-x-4">
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Account</span>
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Account
+              </span>
               <span className="text-xs text-slate-200">{user.email}</span>
             </div>
             <button
@@ -250,7 +272,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
       {/* Main Dashboard Grid */}
       <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-6 py-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
-          
           {/* Left Column (Width: 5/12 on Desktop) - Focus Utilities */}
           <div className="space-y-6 md:col-span-5">
             {/* Timer component */}
@@ -285,11 +306,13 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
               <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-200">
-                    {rightPanelTab === "timeline" ? "Accomplishment History" : "Standup Report Compiler"}
+                    {rightPanelTab === "timeline"
+                      ? "Accomplishment History"
+                      : "Standup Report Compiler"}
                   </h3>
                   <p className="text-xs text-slate-400">
-                    {rightPanelTab === "timeline" 
-                      ? "Chronological log of completed sessions" 
+                    {rightPanelTab === "timeline"
+                      ? "Chronological log of completed sessions"
                       : "Compile logged milestones into text updates"}
                   </p>
                 </div>
@@ -345,7 +368,6 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
               </div>
             )}
           </div>
-
         </div>
       </main>
 

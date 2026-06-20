@@ -1,7 +1,16 @@
 "use client";
 
+import {
+  Coffee,
+  Flame,
+  Moon,
+  Pause,
+  Play,
+  RotateCcw,
+  Settings,
+  SkipForward,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Play, Pause, RotateCcw, SkipForward, Flame, Moon, Coffee, Settings } from "lucide-react";
 
 export type TimerMode = "focus" | "break" | "idle";
 
@@ -23,7 +32,7 @@ interface TimerProps {
 }
 
 export const FOCUS_DURATION = 25 * 60; // 25 minutes
-export const BREAK_DURATION = 5 * 60;  // 5 minutes
+export const BREAK_DURATION = 5 * 60; // 5 minutes
 
 export default function Timer({
   mode,
@@ -42,27 +51,22 @@ export default function Timer({
   onUpdateDurations,
 }: TimerProps) {
   const [showSettings, setShowSettings] = useState(false);
+  const [prevFocusDuration, setPrevFocusDuration] = useState(focusDuration);
+  const [prevBreakDuration, setPrevBreakDuration] = useState(breakDuration);
+
   const [focusInput, setFocusInput] = useState(Math.round(focusDuration / 60));
   const [breakInput, setBreakInput] = useState(Math.round(breakDuration / 60));
 
-  // Sync inputs if durations change from parent
-  useEffect(() => {
+  // Sync inputs during render if durations change from parent
+  if (focusDuration !== prevFocusDuration) {
+    setPrevFocusDuration(focusDuration);
     setFocusInput(Math.round(focusDuration / 60));
-  }, [focusDuration]);
+  }
 
-  useEffect(() => {
+  if (breakDuration !== prevBreakDuration) {
+    setPrevBreakDuration(breakDuration);
     setBreakInput(Math.round(breakDuration / 60));
-  }, [breakDuration]);
-
-  const handleFocusChange = (val: string) => {
-    const min = parseInt(val, 10);
-    if (!isNaN(min) && min >= 1 && min <= 180) {
-      setFocusInput(min);
-      onUpdateDurations(min * 60, breakInput * 60);
-    } else if (val === "") {
-      setFocusInput(0);
-    }
-  };
+  }
 
   const handleBreakChange = (val: string) => {
     const min = parseInt(val, 10);
@@ -71,13 +75,6 @@ export default function Timer({
       onUpdateDurations(focusInput * 60, min * 60);
     } else if (val === "") {
       setBreakInput(0);
-    }
-  };
-
-  const handleFocusBlur = () => {
-    if (focusInput < 1) {
-      setFocusInput(25);
-      onUpdateDurations(25 * 60, breakInput * 60);
     }
   };
 
@@ -92,16 +89,28 @@ export default function Timer({
   const radius = 120;
   const stroke = 8;
   const circumference = 2 * Math.PI * radius; // ~753.98
-  const maxDuration = mode === "focus" ? focusDuration : mode === "break" ? breakDuration : focusDuration;
-  const strokeDashoffset = circumference - (secondsLeft / maxDuration) * circumference;
+  const maxDuration =
+    mode === "focus"
+      ? focusDuration
+      : mode === "break"
+        ? breakDuration
+        : focusDuration;
+  const strokeDashoffset =
+    circumference - (secondsLeft / maxDuration) * circumference;
 
   // Synthesize a gentle crystal chime notification sound on completion
   const playChime = () => {
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (
+          window as unknown as Window & {
+            webkitAudioContext: typeof AudioContext;
+          }
+        ).webkitAudioContext;
       const ctx = new AudioContextClass();
       const now = ctx.currentTime;
-      
+
       // Note 1: E5 (Calm chime)
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
@@ -119,7 +128,7 @@ export default function Timer({
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
       osc2.type = "sine";
-      osc2.frequency.setValueAtTime(880.00, now + 0.15); // A5
+      osc2.frequency.setValueAtTime(880.0, now + 0.15); // A5
       gain2.gain.setValueAtTime(0, now + 0.15);
       gain2.gain.linearRampToValueAtTime(0.25, now + 0.2);
       gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
@@ -143,7 +152,7 @@ export default function Timer({
             // Timer Finished
             setIsRunning(false);
             playChime();
-            
+
             if (mode === "focus") {
               // Trigger accomplishments log overlay callback
               onFocusComplete(Math.round(focusDuration / 60));
@@ -162,7 +171,15 @@ export default function Timer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, mode, setSecondsLeft, setIsRunning, setMode, focusDuration]);
+  }, [
+    isRunning,
+    mode,
+    setSecondsLeft,
+    setIsRunning,
+    setMode,
+    focusDuration,
+    onFocusComplete,
+  ]);
 
   // Format MM:SS
   const formatTime = (secs: number) => {
@@ -206,8 +223,9 @@ export default function Timer({
   const ActiveIcon = activeTheme.icon;
 
   return (
-    <div className={`relative flex w-full flex-col items-center justify-center rounded-[32px] border bg-[rgba(13,20,38,0.45)] p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 ${activeTheme.glow}`}>
-      
+    <div
+      className={`relative flex w-full flex-col items-center justify-center rounded-[32px] border bg-[rgba(13,20,38,0.45)] p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 ${activeTheme.glow}`}
+    >
       {/* Settings Toggle Button */}
       <button
         onClick={() => setShowSettings(!showSettings)}
@@ -218,7 +236,9 @@ export default function Timer({
       </button>
 
       {/* Mode Tag */}
-      <div className={`mb-6 flex items-center space-x-2 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-500 ${activeTheme.tag}`}>
+      <div
+        className={`mb-6 flex items-center space-x-2 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-500 ${activeTheme.tag}`}
+      >
         <ActiveIcon className="h-3.5 w-3.5" />
         <span>{activeTheme.text}</span>
       </div>
@@ -231,8 +251,8 @@ export default function Timer({
             isRunning && mode === "focus"
               ? "h-64 w-64 bg-cyan-500/5 blur-[32px] scale-110 animate-pulse"
               : isRunning && mode === "break"
-              ? "h-64 w-64 bg-violet-500/5 blur-[32px] scale-110 animate-pulse"
-              : "h-0 w-0 opacity-0"
+                ? "h-64 w-64 bg-violet-500/5 blur-[32px] scale-110 animate-pulse"
+                : "h-0 w-0 opacity-0"
           }`}
         />
 
@@ -268,7 +288,11 @@ export default function Timer({
             {formatTime(secondsLeft)}
           </span>
           <span className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            {mode === "focus" ? "Work session" : mode === "break" ? "Rest phase" : "Paused"}
+            {mode === "focus"
+              ? "Work session"
+              : mode === "break"
+                ? "Rest phase"
+                : "Paused"}
           </span>
         </div>
       </div>
@@ -291,21 +315,25 @@ export default function Timer({
             isRunning
               ? "bg-slate-100 text-[#070a13] shadow-lg shadow-white/10 hover:bg-slate-200"
               : mode === "focus"
-              ? "bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/20 hover:bg-cyan-300"
-              : mode === "break"
-              ? "bg-violet-400 text-slate-900 shadow-lg shadow-violet-400/20 hover:bg-violet-300"
-              : "bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/20 hover:bg-cyan-300"
+                ? "bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/20 hover:bg-cyan-300"
+                : mode === "break"
+                  ? "bg-violet-400 text-slate-900 shadow-lg shadow-violet-400/20 hover:bg-violet-300"
+                  : "bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-400/20 hover:bg-cyan-300"
           }`}
         >
           {isRunning ? (
             <div className="flex items-center space-x-2">
               <Pause className="h-5 w-5 fill-current" />
-              <span className="text-sm font-bold uppercase tracking-wider">Pause</span>
+              <span className="text-sm font-bold uppercase tracking-wider">
+                Pause
+              </span>
             </div>
           ) : (
             <div className="flex items-center space-x-2">
               <Play className="h-5 w-5 fill-current" />
-              <span className="text-sm font-bold uppercase tracking-wider">Start</span>
+              <span className="text-sm font-bold uppercase tracking-wider">
+                Start
+              </span>
             </div>
           )}
         </button>
@@ -335,7 +363,9 @@ export default function Timer({
                 className="w-full rounded-lg border border-white/5 bg-slate-900/40 px-3 py-1.5 text-xs text-slate-500 outline-none opacity-60"
                 title="Focus duration is automatically calculated from task plans"
               />
-              <span className="text-[8px] text-slate-500 block">Set by session plans</span>
+              <span className="text-[8px] text-slate-500 block">
+                Set by session plans
+              </span>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">

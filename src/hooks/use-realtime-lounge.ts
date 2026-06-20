@@ -22,6 +22,12 @@ export function useRealtimeLounge(
 ) {
   const [coWorkers, setCoWorkers] = useState<LoungeUser[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const secondsLeftRef = useRef(secondsLeft);
+
+  // Sync ref to avoid running sync effect every second
+  useEffect(() => {
+    secondsLeftRef.current = secondsLeft;
+  }, [secondsLeft]);
 
   // Sync our presence state whenever our timer parameters change
   useEffect(() => {
@@ -63,7 +69,7 @@ export function useRealtimeLounge(
         .subscribe(async (status) => {
           if (status === "SUBSCRIBED") {
             // Calculate absolute end time if running
-            const endTime = isRunning ? Date.now() + secondsLeft * 1000 : null;
+            const endTime = isRunning ? Date.now() + secondsLeftRef.current * 1000 : null;
             await channel.track({
               email: userEmail,
               mode: isRunning ? mode : "idle",
@@ -75,14 +81,14 @@ export function useRealtimeLounge(
       channelRef.current = channel;
     } else {
       // Channel already exists, track updated state
-      const endTime = isRunning ? Date.now() + secondsLeft * 1000 : null;
+      const endTime = isRunning ? Date.now() + secondsLeftRef.current * 1000 : null;
       channelRef.current.track({
         email: userEmail,
         mode: isRunning ? mode : "idle",
         endTime,
       }).catch(console.error);
     }
-  }, [userId, userEmail, mode, secondsLeft, isRunning]);
+  }, [userId, userEmail, mode, isRunning]);
 
   // Clean up channel on unmount
   useEffect(() => {
