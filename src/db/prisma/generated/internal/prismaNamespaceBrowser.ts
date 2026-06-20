@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   FocusLog: 'FocusLog',
+  TaskPlan: 'TaskPlan',
   User: 'User'
 } as const
 
@@ -81,6 +82,19 @@ export const FocusLogScalarFieldEnum = {
 } as const
 
 export type FocusLogScalarFieldEnum = (typeof FocusLogScalarFieldEnum)[keyof typeof FocusLogScalarFieldEnum]
+
+
+export const TaskPlanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  category: 'category',
+  title: 'title',
+  durationMin: 'durationMin',
+  isCompleted: 'isCompleted',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskPlanScalarFieldEnum = (typeof TaskPlanScalarFieldEnum)[keyof typeof TaskPlanScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

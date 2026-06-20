@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { createBrownNoiseNode } from "@/utils/noise-generator";
+import { useEffect, useRef, useState } from "react";
 
 export interface AudioVolumes {
   noise: number;
@@ -24,11 +24,11 @@ export function useAudio() {
   });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
-  
+
   // Audio nodes refs
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const noiseGainRef = useRef<GainNode | null>(null);
-  
+
   const rainAudioRef = useRef<HTMLAudioElement | null>(null);
   const rainGainRef = useRef<MediaElementAudioSourceNode | null>(null);
   const rainGainNodeRef = useRef<GainNode | null>(null);
@@ -42,7 +42,13 @@ export function useAudio() {
     if (audioCtxRef.current) return;
 
     // 1. Create AudioContext
-    const AudioContextClass = window.AudioContext || (window as unknown as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (
+        window as unknown as Window & {
+          webkitAudioContext: typeof AudioContext;
+        }
+      ).webkitAudioContext;
     const ctx = new AudioContextClass();
     audioCtxRef.current = ctx;
 
@@ -99,7 +105,7 @@ export function useAudio() {
       // Pause audio players
       if (rainAudioRef.current) rainAudioRef.current.pause();
       if (lofiAudioRef.current) lofiAudioRef.current.pause();
-      
+
       // Stop noise loop source
       try {
         if (noiseSourceRef.current) {
@@ -139,8 +145,10 @@ export function useAudio() {
 
     // Restore volumes before playing
     if (noiseGainRef.current) noiseGainRef.current.gain.value = volumes.noise;
-    if (rainGainNodeRef.current) rainGainNodeRef.current.gain.value = volumes.rain;
-    if (lofiGainNodeRef.current) lofiGainNodeRef.current.gain.value = volumes.lofi;
+    if (rainGainNodeRef.current)
+      rainGainNodeRef.current.gain.value = volumes.rain;
+    if (lofiGainNodeRef.current)
+      lofiGainNodeRef.current.gain.value = volumes.lofi;
 
     // Play streaming loops
     if (rainAudioRef.current) {
@@ -179,10 +187,16 @@ export function useAudio() {
       noiseGainRef.current.gain.exponentialRampToValueAtTime(0.001, fadeTime);
     }
     if (rainGainNodeRef.current) {
-      rainGainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, fadeTime);
+      rainGainNodeRef.current.gain.exponentialRampToValueAtTime(
+        0.001,
+        fadeTime,
+      );
     }
     if (lofiGainNodeRef.current) {
-      lofiGainNodeRef.current.gain.exponentialRampToValueAtTime(0.001, fadeTime);
+      lofiGainNodeRef.current.gain.exponentialRampToValueAtTime(
+        0.001,
+        fadeTime,
+      );
     }
 
     // Set pause timeout

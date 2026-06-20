@@ -4,6 +4,7 @@ model User {
   password  String
   createdAt DateTime   @default(now())
   logs      FocusLog[]
+  plans     TaskPlan[]
 
   @@map("users")
 }

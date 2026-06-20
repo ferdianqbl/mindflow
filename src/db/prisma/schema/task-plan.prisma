@@ -1,0 +1,12 @@
+model TaskPlan {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String   // e.g. "coding" | "debugging" | "design" | "learning" | "meeting" | "operations"
+  title       String   // Task description
+  durationMin Int      // Planned duration in minutes
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("task_plans")
+}

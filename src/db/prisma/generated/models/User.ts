@@ -175,6 +175,7 @@ export type UserWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   logs?: Prisma.FocusLogListRelationFilter
+  plans?: Prisma.TaskPlanListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -183,6 +184,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   logs?: Prisma.FocusLogOrderByRelationAggregateInput
+  plans?: Prisma.TaskPlanOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -194,6 +196,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   logs?: Prisma.FocusLogListRelationFilter
+  plans?: Prisma.TaskPlanListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -222,6 +225,7 @@ export type UserCreateInput = {
   password: string
   createdAt?: Date | string
   logs?: Prisma.FocusLogCreateNestedManyWithoutUserInput
+  plans?: Prisma.TaskPlanCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -230,6 +234,7 @@ export type UserUncheckedCreateInput = {
   password: string
   createdAt?: Date | string
   logs?: Prisma.FocusLogUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.TaskPlanUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -238,6 +243,7 @@ export type UserUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   logs?: Prisma.FocusLogUpdateManyWithoutUserNestedInput
+  plans?: Prisma.TaskPlanUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -246,6 +252,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   logs?: Prisma.FocusLogUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.TaskPlanUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -309,11 +316,26 @@ export type UserUpdateOneRequiredWithoutLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLogsInput, Prisma.UserUpdateWithoutLogsInput>, Prisma.UserUncheckedUpdateWithoutLogsInput>
 }
 
+export type UserCreateNestedOneWithoutPlansInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPlansInput, Prisma.UserUncheckedCreateWithoutPlansInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPlansInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPlansNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPlansInput, Prisma.UserUncheckedCreateWithoutPlansInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPlansInput
+  upsert?: Prisma.UserUpsertWithoutPlansInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPlansInput, Prisma.UserUpdateWithoutPlansInput>, Prisma.UserUncheckedUpdateWithoutPlansInput>
+}
+
 export type UserCreateWithoutLogsInput = {
   id: string
   email: string
   password: string
   createdAt?: Date | string
+  plans?: Prisma.TaskPlanCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLogsInput = {
@@ -321,6 +343,7 @@ export type UserUncheckedCreateWithoutLogsInput = {
   email: string
   password: string
   createdAt?: Date | string
+  plans?: Prisma.TaskPlanUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLogsInput = {
@@ -344,6 +367,7 @@ export type UserUpdateWithoutLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plans?: Prisma.TaskPlanUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLogsInput = {
@@ -351,6 +375,55 @@ export type UserUncheckedUpdateWithoutLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plans?: Prisma.TaskPlanUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPlansInput = {
+  id: string
+  email: string
+  password: string
+  createdAt?: Date | string
+  logs?: Prisma.FocusLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPlansInput = {
+  id: string
+  email: string
+  password: string
+  createdAt?: Date | string
+  logs?: Prisma.FocusLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPlansInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPlansInput, Prisma.UserUncheckedCreateWithoutPlansInput>
+}
+
+export type UserUpsertWithoutPlansInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPlansInput, Prisma.UserUncheckedUpdateWithoutPlansInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPlansInput, Prisma.UserUncheckedCreateWithoutPlansInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPlansInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPlansInput, Prisma.UserUncheckedUpdateWithoutPlansInput>
+}
+
+export type UserUpdateWithoutPlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  logs?: Prisma.FocusLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  logs?: Prisma.FocusLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -360,10 +433,12 @@ export type UserUncheckedUpdateWithoutLogsInput = {
 
 export type UserCountOutputType = {
   logs: number
+  plans: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   logs?: boolean | UserCountOutputTypeCountLogsArgs
+  plans?: boolean | UserCountOutputTypeCountPlansArgs
 }
 
 /**
@@ -383,6 +458,13 @@ export type UserCountOutputTypeCountLogsArgs<ExtArgs extends runtime.Types.Exten
   where?: Prisma.FocusLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskPlanWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -390,6 +472,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   createdAt?: boolean
   logs?: boolean | Prisma.User$logsArgs<ExtArgs>
+  plans?: boolean | Prisma.User$plansArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -417,6 +500,7 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   logs?: boolean | Prisma.User$logsArgs<ExtArgs>
+  plans?: boolean | Prisma.User$plansArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -426,6 +510,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     logs: Prisma.$FocusLogPayload<ExtArgs>[]
+    plans: Prisma.$TaskPlanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -827,6 +912,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   logs<T extends Prisma.User$logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FocusLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  plans<T extends Prisma.User$plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1274,6 +1360,30 @@ export type User$logsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   take?: number
   skip?: number
   distinct?: Prisma.FocusLogScalarFieldEnum | Prisma.FocusLogScalarFieldEnum[]
+}
+
+/**
+ * User.plans
+ */
+export type User$plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskPlan
+   */
+  select?: Prisma.TaskPlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskPlan
+   */
+  omit?: Prisma.TaskPlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskPlanInclude<ExtArgs> | null
+  where?: Prisma.TaskPlanWhereInput
+  orderBy?: Prisma.TaskPlanOrderByWithRelationInput | Prisma.TaskPlanOrderByWithRelationInput[]
+  cursor?: Prisma.TaskPlanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskPlanScalarFieldEnum | Prisma.TaskPlanScalarFieldEnum[]
 }
 
 /**

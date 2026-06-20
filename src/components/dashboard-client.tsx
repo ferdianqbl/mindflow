@@ -13,6 +13,8 @@ import StandupPanel from "@/components/standup-panel";
 import WellnessGuide from "@/components/wellness-guide";
 import DashboardStats from "@/components/dashboard-stats";
 import CoWorkingLounge from "@/components/co-working-lounge";
+import PlanModal from "@/components/plan-modal";
+import ValidateModal from "@/components/validate-modal";
 
 import { useAudio } from "@/hooks/use-audio";
 import { useRealtimeLounge } from "@/hooks/use-realtime-lounge";
@@ -36,6 +38,8 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   // 2. UI Modals & Tab State
   const [isJournalOpen, setIsJournalOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isValidateModalOpen, setIsValidateModalOpen] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState<"timeline" | "standup">("timeline");
 
   // 3. Ambient Audio Mixer Hook
@@ -46,13 +50,39 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   // 5. Timer Control Actions
   const handleStart = () => {
-    setIsRunning(true);
-    // If starting a fresh session, set mode to focus
+    // If starting a fresh session from idle, we need to create plans first!
     if (mode === "idle") {
-      setMode("focus");
-      setSecondsLeft(focusDuration);
+      setIsPlanModalOpen(true);
+      return;
     }
-    // Play mixed background tracks
+    
+    setIsRunning(true);
+    audio.play();
+  };
+
+  const handleStartSession = async (plans: Array<{ title: string; category: string; durationMin: number }>) => {
+    // 1. Save plans to DB
+    const response = await fetch("/api/plans", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ plans }),
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json();
+      throw new Error(errJson.error || "Failed to save session plans");
+    }
+
+    // 2. Set the focus session duration to the sum of the planned durations
+    const totalMinutes = plans.reduce((acc, curr) => acc + curr.durationMin, 0);
+    const totalSeconds = totalMinutes * 60;
+    
+    setFocusDuration(totalSeconds);
+    setSecondsLeft(totalSeconds);
+    setMode("focus");
+    setIsRunning(true);
     audio.play();
   };
 
@@ -104,8 +134,27 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   const handleFocusComplete = (durationMinutes: number) => {
     // Stop audio
     audio.pause();
-    // Open accomplishment logging overlay
-    setIsJournalOpen(true);
+    setIsRunning(false);
+    // Open validation review overlay
+    setIsValidateModalOpen(true);
+  };
+
+  const handleValidationComplete = async (completedCount: number) => {
+    // Refresh accomplishments
+    await refreshLogs();
+
+    // Transition to break
+    setMode("break");
+    setSecondsLeft(breakDuration);
+    setIsRunning(true);
+  };
+
+  const handleSkipValidation = () => {
+    setIsValidateModalOpen(false);
+    // Transition to break even if skipped
+    setMode("break");
+    setSecondsLeft(breakDuration);
+    setIsRunning(true);
   };
 
   // Submit log to database via API
@@ -329,6 +378,19 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
         onClose={() => setIsJournalOpen(false)}
         onSubmit={handleSubmitLog}
         onSkip={handleSkipLogging}
+      />
+
+      <PlanModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onStartSession={handleStartSession}
+      />
+
+      <ValidateModal
+        isOpen={isValidateModalOpen}
+        onClose={() => setIsValidateModalOpen(false)}
+        onSubmitValidation={handleValidationComplete}
+        onSkip={handleSkipValidation}
       />
     </div>
   );

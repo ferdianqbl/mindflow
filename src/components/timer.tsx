@@ -333,14 +333,12 @@ export default function Timer({
               </label>
               <input
                 type="number"
-                min="1"
-                max="180"
                 value={focusInput || ""}
-                onChange={(e) => handleFocusChange(e.target.value)}
-                onBlur={handleFocusBlur}
-                disabled={isRunning}
-                className="w-full rounded-lg border border-white/5 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-cyan-500/30 disabled:opacity-50"
+                disabled
+                className="w-full rounded-lg border border-white/5 bg-slate-900/40 px-3 py-1.5 text-xs text-slate-500 outline-none opacity-60"
+                title="Focus duration is automatically calculated from task plans"
               />
+              <span className="text-[8px] text-slate-500 block">Set by session plans</span>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">

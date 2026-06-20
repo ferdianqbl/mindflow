@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import { Volume2, VolumeX, CloudRain, Headphones, Flame, Play, Pause } from "lucide-react";
 import { AudioVolumes } from "@/hooks/use-audio";
+import { Headphones, Music, Pause, Play, Volume2, VolumeX } from "lucide-react";
 
 interface AudioMixerProps {
   isPlaying: boolean;
@@ -20,17 +19,17 @@ export default function AudioMixer({
   setVolume,
 }: AudioMixerProps) {
   const channels = [
-    {
-      id: "noise" as keyof AudioVolumes,
-      name: "Focus Noise",
-      icon: Flame,
-      color: "text-amber-400",
-      description: "Synthesized Brown Noise",
-    },
+    // {
+    //   id: "noise" as keyof AudioVolumes,
+    //   name: "Focus Noise",
+    //   icon: Flame,
+    //   color: "text-amber-400",
+    //   description: "Synthesized Brown Noise",
+    // },
     {
       id: "rain" as keyof AudioVolumes,
-      name: "Heavy Rain",
-      icon: CloudRain,
+      name: "Instruments",
+      icon: Music,
       color: "text-cyan-400",
       description: "Masking ambient loop",
     },
@@ -48,8 +47,12 @@ export default function AudioMixer({
       {/* Title & Master Control */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-100">Ambient Soundscapes</h2>
-          <p className="text-xs text-slate-400">Mix background noise to enhance concentration</p>
+          <h2 className="text-lg font-semibold text-slate-100">
+            Ambient Soundscapes
+          </h2>
+          <p className="text-xs text-slate-400">
+            Mix background noise to enhance concentration
+          </p>
         </div>
         <button
           onClick={isPlaying ? pause : play}
@@ -59,7 +62,11 @@ export default function AudioMixer({
               : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10 hover:bg-cyan-500/30"
           }`}
         >
-          {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
+          {isPlaying ? (
+            <Pause className="h-5 w-5 fill-current" />
+          ) : (
+            <Play className="h-5 w-5 fill-current ml-0.5" />
+          )}
         </button>
       </div>
 
@@ -83,13 +90,19 @@ export default function AudioMixer({
                     <Icon className="h-4.5 w-4.5" />
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-slate-200">{channel.name}</span>
-                    <span className="hidden sm:block text-[10px] text-slate-400">{channel.description}</span>
+                    <span className="text-sm font-medium text-slate-200">
+                      {channel.name}
+                    </span>
+                    <span className="hidden sm:block text-[10px] text-slate-400">
+                      {channel.description}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setVolume(channel.id, volValue > 0 ? 0 : 0.5)}
+                    onClick={() =>
+                      setVolume(channel.id, volValue > 0 ? 0 : 0.5)
+                    }
                     className="text-slate-400 transition-colors duration-200 hover:text-slate-200"
                   >
                     {isChannelMuted ? (
@@ -112,7 +125,9 @@ export default function AudioMixer({
                   max="1"
                   step="0.01"
                   value={volValue}
-                  onChange={(e) => setVolume(channel.id, parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    setVolume(channel.id, parseFloat(e.target.value))
+                  }
                   className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 outline-none accent-cyan-400 transition-all duration-200 hover:bg-slate-700"
                   style={{
                     background: `linear-gradient(to right, #00f2fe 0%, #00f2fe ${volValue * 100}%, #1e293b ${volValue * 100}%, #1e293b 100%)`,

@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   FocusLog: 'FocusLog',
+  TaskPlan: 'TaskPlan',
   User: 'User'
 } as const
 
@@ -401,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "focusLog" | "user"
+    modelProps: "focusLog" | "taskPlan" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -476,6 +477,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FocusLogCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FocusLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskPlan: {
+      payload: Prisma.$TaskPlanPayload<ExtArgs>
+      fields: Prisma.TaskPlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskPlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskPlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskPlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskPlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        findMany: {
+          args: Prisma.TaskPlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>[]
+        }
+        create: {
+          args: Prisma.TaskPlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        createMany: {
+          args: Prisma.TaskPlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaskPlanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>[]
+        }
+        delete: {
+          args: Prisma.TaskPlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        update: {
+          args: Prisma.TaskPlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskPlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskPlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaskPlanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>[]
+        }
+        upsert: {
+          args: Prisma.TaskPlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPlanPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskPlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskPlan>
+        }
+        groupBy: {
+          args: Prisma.TaskPlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskPlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskPlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskPlanCountAggregateOutputType> | number
         }
       }
     }
@@ -604,6 +679,19 @@ export const FocusLogScalarFieldEnum = {
 export type FocusLogScalarFieldEnum = (typeof FocusLogScalarFieldEnum)[keyof typeof FocusLogScalarFieldEnum]
 
 
+export const TaskPlanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  category: 'category',
+  title: 'title',
+  durationMin: 'durationMin',
+  isCompleted: 'isCompleted',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskPlanScalarFieldEnum = (typeof TaskPlanScalarFieldEnum)[keyof typeof TaskPlanScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -675,6 +763,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -802,6 +897,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   focusLog?: Prisma.FocusLogOmit
+  taskPlan?: Prisma.TaskPlanOmit
   user?: Prisma.UserOmit
 }
 

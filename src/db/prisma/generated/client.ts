@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type FocusLog = Prisma.FocusLogModel
 /**
+ * Model TaskPlan
+ * 
+ */
+export type TaskPlan = Prisma.TaskPlanModel
+/**
  * Model User
  * 
  */
