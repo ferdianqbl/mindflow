@@ -1,0 +1,8 @@
+model User {
+  id        String     @id // Maps to Supabase auth.users.id
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  logs      FocusLog[]
+
+  @@map("users")
+}

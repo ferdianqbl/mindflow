@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/utils/prisma';
-import { supabase } from '@/utils/supabase';
+import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
-// Helper function to authenticate the Bearer JWT token from request headers
-async function authenticate(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader) {
-    return { error: 'Missing authorization header', status: 401 };
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  if (!token) {
-    return { error: 'Invalid authorization token format', status: 401 };
-  }
-
+// Helper function to authenticate the user using cookies
+async function authenticate() {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
-      return { error: `Unauthorized: ${error?.message || 'Invalid token'}`, status: 401 };
+      return { error: `Unauthorized: ${error?.message || 'Invalid session'}`, status: 401 };
     }
     return { user };
   } catch (err: any) {
@@ -27,7 +20,7 @@ async function authenticate(req: NextRequest) {
 
 // GET /api/logs - Fetch all focus logs for the authenticated user
 export async function GET(req: NextRequest) {
-  const auth = await authenticate(req);
+  const auth = await authenticate();
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -56,7 +49,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/logs - Save a completed focus session log
 export async function POST(req: NextRequest) {
-  const auth = await authenticate(req);
+  const auth = await authenticate();
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
