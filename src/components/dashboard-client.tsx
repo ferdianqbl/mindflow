@@ -27,6 +27,8 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   
   // 1. Core Timer and Logs State
   const [mode, setMode] = useState<TimerMode>("idle");
+  const [focusDuration, setFocusDuration] = useState<number>(FOCUS_DURATION);
+  const [breakDuration, setBreakDuration] = useState<number>(BREAK_DURATION);
   const [secondsLeft, setSecondsLeft] = useState<number>(FOCUS_DURATION);
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<FocusLogItem[]>(initialLogs);
@@ -48,7 +50,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     // If starting a fresh session, set mode to focus
     if (mode === "idle") {
       setMode("focus");
-      setSecondsLeft(FOCUS_DURATION);
+      setSecondsLeft(focusDuration);
     }
     // Play mixed background tracks
     audio.play();
@@ -64,10 +66,10 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     audio.pause();
     
     if (mode === "break") {
-      setSecondsLeft(BREAK_DURATION);
+      setSecondsLeft(breakDuration);
     } else {
       setMode("idle");
-      setSecondsLeft(FOCUS_DURATION);
+      setSecondsLeft(focusDuration);
     }
   };
 
@@ -78,11 +80,23 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     if (mode === "focus") {
       // Skip work -> Start a break
       setMode("break");
-      setSecondsLeft(BREAK_DURATION);
+      setSecondsLeft(breakDuration);
     } else {
       // Skip break/idle -> Go to focus idle
       setMode("idle");
-      setSecondsLeft(FOCUS_DURATION);
+      setSecondsLeft(focusDuration);
+    }
+  };
+
+  const handleUpdateDurations = (focusSecs: number, breakSecs: number) => {
+    setFocusDuration(focusSecs);
+    setBreakDuration(breakSecs);
+    if (!isRunning) {
+      if (mode === "break") {
+        setSecondsLeft(breakSecs);
+      } else if (mode === "idle" || mode === "focus") {
+        setSecondsLeft(focusSecs);
+      }
     }
   };
 
@@ -105,7 +119,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
         body: JSON.stringify({
           category: data.category,
           description: data.description,
-          durationMinutes: 25, // Default Pomodoro length
+          durationMinutes: Math.round(focusDuration / 60),
         }),
       });
 
@@ -117,9 +131,9 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
       // Refresh log timeline list
       await refreshLogs();
 
-      // Automatically transition user into a 5-minute break
+      // Automatically transition user into a break
       setMode("break");
-      setSecondsLeft(BREAK_DURATION);
+      setSecondsLeft(breakDuration);
       setIsRunning(true);
     } catch (e) {
       console.error(e);
@@ -147,7 +161,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
     setIsJournalOpen(false);
     // Transition to break even if they skip writing a note
     setMode("break");
-    setSecondsLeft(BREAK_DURATION);
+    setSecondsLeft(breakDuration);
     setIsRunning(true);
   };
 
@@ -217,6 +231,9 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
               setIsRunning={setIsRunning}
               onFocusComplete={handleFocusComplete}
               fadeOutAudio={audio.fadeOut}
+              focusDuration={focusDuration}
+              breakDuration={breakDuration}
+              onUpdateDurations={handleUpdateDurations}
             />
 
             {/* Ambient Soundboard Mixer */}
@@ -251,30 +268,39 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
                   </p>
                 </div>
 
-                {/* Tab select buttons */}
-                <div className="flex space-x-1 rounded-lg bg-slate-950/40 p-1 border border-white/5 self-start">
+                {/* Tab select buttons and Log Accomplishment Button */}
+                <div className="flex items-center space-x-3 self-start">
                   <button
-                    onClick={() => setRightPanelTab("timeline")}
-                    className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-all duration-300 ${
-                      rightPanelTab === "timeline"
-                        ? "bg-slate-800 text-slate-100 shadow-md"
-                        : "text-slate-400 hover:text-slate-200"
-                    }`}
+                    onClick={() => setIsJournalOpen(true)}
+                    className="flex items-center space-x-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 text-xs font-semibold text-cyan-400 outline-none transition-all duration-300 hover:bg-cyan-500/20 active:scale-95"
                   >
-                    <History className="h-3.5 w-3.5" />
-                    <span>Timeline</span>
+                    <span>+ Log Accomplishment</span>
                   </button>
-                  <button
-                    onClick={() => setRightPanelTab("standup")}
-                    className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-all duration-300 ${
-                      rightPanelTab === "standup"
-                        ? "bg-slate-800 text-slate-100 shadow-md"
-                        : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    <ClipboardList className="h-3.5 w-3.5" />
-                    <span>Standup</span>
-                  </button>
+
+                  <div className="flex space-x-1 rounded-lg bg-slate-950/40 p-1 border border-white/5">
+                    <button
+                      onClick={() => setRightPanelTab("timeline")}
+                      className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-all duration-300 ${
+                        rightPanelTab === "timeline"
+                          ? "bg-slate-800 text-slate-100 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      <span>Timeline</span>
+                    </button>
+                    <button
+                      onClick={() => setRightPanelTab("standup")}
+                      className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-all duration-300 ${
+                        rightPanelTab === "standup"
+                          ? "bg-slate-800 text-slate-100 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      <ClipboardList className="h-3.5 w-3.5" />
+                      <span>Standup</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 

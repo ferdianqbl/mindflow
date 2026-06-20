@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { Play, Pause, RotateCcw, SkipForward, Flame, Moon, Coffee } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Play, Pause, RotateCcw, SkipForward, Flame, Moon, Coffee, Settings } from "lucide-react";
 
 export type TimerMode = "focus" | "break" | "idle";
 
@@ -18,6 +18,9 @@ interface TimerProps {
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   onFocusComplete: (durationMinutes: number) => void;
   fadeOutAudio: () => void;
+  focusDuration: number;
+  breakDuration: number;
+  onUpdateDurations: (focus: number, breakDur: number) => void;
 }
 
 export const FOCUS_DURATION = 25 * 60; // 25 minutes
@@ -36,12 +39,62 @@ export default function Timer({
   setIsRunning,
   onFocusComplete,
   fadeOutAudio,
+  focusDuration,
+  breakDuration,
+  onUpdateDurations,
 }: TimerProps) {
+  const [showSettings, setShowSettings] = useState(false);
+  const [focusInput, setFocusInput] = useState(Math.round(focusDuration / 60));
+  const [breakInput, setBreakInput] = useState(Math.round(breakDuration / 60));
+
+  // Sync inputs if durations change from parent
+  useEffect(() => {
+    setFocusInput(Math.round(focusDuration / 60));
+  }, [focusDuration]);
+
+  useEffect(() => {
+    setBreakInput(Math.round(breakDuration / 60));
+  }, [breakDuration]);
+
+  const handleFocusChange = (val: string) => {
+    const min = parseInt(val, 10);
+    if (!isNaN(min) && min >= 1 && min <= 180) {
+      setFocusInput(min);
+      onUpdateDurations(min * 60, breakInput * 60);
+    } else if (val === "") {
+      setFocusInput(0);
+    }
+  };
+
+  const handleBreakChange = (val: string) => {
+    const min = parseInt(val, 10);
+    if (!isNaN(min) && min >= 1 && min <= 60) {
+      setBreakInput(min);
+      onUpdateDurations(focusInput * 60, min * 60);
+    } else if (val === "") {
+      setBreakInput(0);
+    }
+  };
+
+  const handleFocusBlur = () => {
+    if (focusInput < 1) {
+      setFocusInput(25);
+      onUpdateDurations(25 * 60, breakInput * 60);
+    }
+  };
+
+  const handleBreakBlur = () => {
+    if (breakInput < 1) {
+      setBreakInput(5);
+      onUpdateDurations(focusInput * 60, 5 * 60);
+    }
+  };
+
   // SVG Circumference calculations for r=120
   const radius = 120;
   const stroke = 8;
   const circumference = 2 * Math.PI * radius; // ~753.98
-  const maxDuration = mode === "focus" ? FOCUS_DURATION : mode === "break" ? BREAK_DURATION : FOCUS_DURATION;
+  const maxDuration = mode === "focus" ? focusDuration : mode === "break" ? breakDuration : focusDuration;
   const strokeDashoffset = circumference - (secondsLeft / maxDuration) * circumference;
 
   // Synthesize a gentle crystal chime notification sound on completion
@@ -95,12 +148,12 @@ export default function Timer({
             
             if (mode === "focus") {
               fadeOutAudio();
-              // Trigger accomplishments log overlay callback (25 mins)
-              onFocusComplete(25);
+              // Trigger accomplishments log overlay callback
+              onFocusComplete(Math.round(focusDuration / 60));
             } else {
               // Transition back from break to idle or focus
               setMode("idle");
-              setSecondsLeft(FOCUS_DURATION);
+              setSecondsLeft(focusDuration);
             }
             return 0;
           }
@@ -112,7 +165,7 @@ export default function Timer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, mode, setSecondsLeft, setIsRunning, setMode, fadeOutAudio]);
+  }, [isRunning, mode, setSecondsLeft, setIsRunning, setMode, fadeOutAudio, focusDuration]);
 
   // Format MM:SS
   const formatTime = (secs: number) => {
@@ -158,6 +211,15 @@ export default function Timer({
   return (
     <div className={`relative flex w-full flex-col items-center justify-center rounded-[32px] border bg-[rgba(13,20,38,0.45)] p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 ${activeTheme.glow}`}>
       
+      {/* Settings Toggle Button */}
+      <button
+        onClick={() => setShowSettings(!showSettings)}
+        className="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-lg border border-white/5 bg-white/5 text-slate-400 outline-none transition-all duration-200 hover:bg-white/10 hover:text-slate-200 active:scale-95 z-20"
+        title="Timer Settings"
+      >
+        <Settings className="h-4 w-4" />
+      </button>
+
       {/* Mode Tag */}
       <div className={`mb-6 flex items-center space-x-2 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-500 ${activeTheme.tag}`}>
         <ActiveIcon className="h-3.5 w-3.5" />
@@ -260,6 +322,49 @@ export default function Timer({
           <SkipForward className="h-4.5 w-4.5" />
         </button>
       </div>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="mt-6 w-full max-w-[280px] rounded-2xl border border-white/5 bg-slate-950/40 p-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Focus (Min)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="180"
+                value={focusInput || ""}
+                onChange={(e) => handleFocusChange(e.target.value)}
+                onBlur={handleFocusBlur}
+                disabled={isRunning}
+                className="w-full rounded-lg border border-white/5 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-cyan-500/30 disabled:opacity-50"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Break (Min)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="60"
+                value={breakInput || ""}
+                onChange={(e) => handleBreakChange(e.target.value)}
+                onBlur={handleBreakBlur}
+                disabled={isRunning}
+                className="w-full rounded-lg border border-white/5 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-violet-500/30 disabled:opacity-50"
+              />
+            </div>
+          </div>
+          {isRunning && (
+            <p className="mt-2 text-center text-[9px] font-medium text-slate-500">
+              Cannot edit settings while timer is running
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

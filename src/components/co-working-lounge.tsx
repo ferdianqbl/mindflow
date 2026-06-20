@@ -39,23 +39,31 @@ export default function CoWorkingLounge({ coWorkers }: CoWorkingLoungeProps) {
   );
 }
 
+// Helper to calculate seconds left from worker.endTime
+const getSecondsRemaining = (endTime: number | null) => {
+  if (!endTime) return 0;
+  return Math.max(0, Math.round((endTime - Date.now()) / 1000));
+};
+
 // Sub-component to manage its own tick interval for other users' timers
 function CoWorkerCard({ worker }: { worker: LoungeUser }) {
-  const [secondsLeft, setSecondsLeft] = useState<number>(0);
+  const [prevEndTime, setPrevEndTime] = useState<number | null>(worker.endTime);
+  const [secondsLeft, setSecondsLeft] = useState<number>(() => getSecondsRemaining(worker.endTime));
+
+  // Adjust state during rendering when prop changes to avoid cascading renders
+  if (worker.endTime !== prevEndTime) {
+    setPrevEndTime(worker.endTime);
+    setSecondsLeft(getSecondsRemaining(worker.endTime));
+  }
 
   useEffect(() => {
     if (!worker.endTime) {
-      setSecondsLeft(0);
       return;
     }
 
-    const calculateTime = () => {
-      const diff = Math.max(0, Math.round((worker.endTime! - Date.now()) / 1000));
-      setSecondsLeft(diff);
-    };
-
-    calculateTime();
-    const interval = setInterval(calculateTime, 1000);
+    const interval = setInterval(() => {
+      setSecondsLeft(getSecondsRemaining(worker.endTime));
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [worker.endTime]);
