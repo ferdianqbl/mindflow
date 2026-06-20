@@ -3,8 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, History, ClipboardList, Coffee } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
 
 // Components & Hooks import
 import Timer, { TimerMode, FOCUS_DURATION, BREAK_DURATION } from "@/components/timer";
@@ -20,7 +18,7 @@ import { useAudio } from "@/hooks/use-audio";
 import { useRealtimeLounge } from "@/hooks/use-realtime-lounge";
 
 interface DashboardClientProps {
-  user: User;
+  user: { id: string; email: string };
   initialLogs: FocusLogItem[];
 }
 
@@ -99,16 +97,10 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   // Submit log to database via API
   const handleSubmitLog = async (data: { category: WorkCategory; description: string }) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      if (!token) throw new Error("No active authentication token found.");
-
       const response = await fetch("/api/logs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           category: data.category,
@@ -123,7 +115,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
       }
 
       // Refresh log timeline list
-      await refreshLogs(token);
+      await refreshLogs();
 
       // Automatically transition user into a 5-minute break
       setMode("break");
@@ -136,14 +128,10 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
   };
 
   // Fetch updated logs from API
-  const refreshLogs = async (token: string) => {
+  const refreshLogs = async () => {
     setLoadingLogs(true);
     try {
-      const response = await fetch("/api/logs", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch("/api/logs");
       if (response.ok) {
         const json = await response.json();
         setLogs(json.logs);
@@ -165,7 +153,7 @@ export default function DashboardClient({ user, initialLogs }: DashboardClientPr
 
   const handleLogout = async () => {
     audio.pause();
-    await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" });
     router.replace("/login");
     router.refresh();
   };

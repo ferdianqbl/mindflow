@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Flame, Clock, CheckCircle2, TrendingUp } from "lucide-react";
-import { FocusLogItem } from "./timeline";
-import { CATEGORY_EMOJIS, CATEGORY_LABELS } from "@/utils/formatters";
 import { WorkCategory } from "@/components/journal-modal";
+import { CATEGORY_EMOJIS, CATEGORY_LABELS } from "@/utils/formatters";
+import { CheckCircle2, Clock, Flame } from "lucide-react";
+import { useMemo } from "react";
+import { FocusLogItem } from "./timeline";
 
 interface DashboardStatsProps {
   logs: FocusLogItem[];
@@ -14,17 +14,20 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
   // 1. Calculate Core Metrics
   const metrics = useMemo(() => {
     const totalSessions = logs.length;
-    const totalMinutes = logs.reduce((sum, log) => sum + log.durationMinutes, 0);
+    const totalMinutes = logs.reduce(
+      (sum, log) => sum + log.durationMinutes,
+      0,
+    );
     const totalHours = (totalMinutes / 60).toFixed(1);
 
     // Calculate Focus Streak (Consecutive days focusing, starting from today/yesterday)
     let currentStreak = 0;
     if (logs.length > 0) {
       const logDates = new Set(
-        logs.map((log) => new Date(log.createdAt).toDateString())
+        logs.map((log) => new Date(log.createdAt).toDateString()),
       );
-      
-      let checkDate = new Date();
+
+      const checkDate = new Date();
       // Check if they focused today. If not, check if they focused yesterday to preserve the streak.
       if (!logDates.has(checkDate.toDateString())) {
         checkDate.setDate(checkDate.getDate() - 1);
@@ -51,33 +54,42 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
     });
 
     const total = logs.length || 1;
-    const categoriesList = ["coding", "debugging", "design", "learning", "meeting", "operations"];
+    const categoriesList = [
+      "coding",
+      "debugging",
+      "design",
+      "learning",
+      "meeting",
+      "operations",
+    ];
     const colors: Record<string, string> = {
-      coding: "#00f2fe",      // Cyan
-      debugging: "#ef4444",   // Red
-      design: "#f43f5e",      // Pink
-      learning: "#f59e0b",    // Amber
-      meeting: "#6366f1",     // Indigo
-      operations: "#94a3b8",  // Slate
+      coding: "#00f2fe", // Cyan
+      debugging: "#ef4444", // Red
+      design: "#f43f5e", // Pink
+      learning: "#f59e0b", // Amber
+      meeting: "#6366f1", // Indigo
+      operations: "#94a3b8", // Slate
     };
 
     let accumulatedPercentage = 0;
-    return categoriesList.map((catKey) => {
-      const count = counts[catKey] || 0;
-      const percentage = (count / total) * 100;
-      const startAngle = (accumulatedPercentage / 100) * 360;
-      accumulatedPercentage += percentage;
+    return categoriesList
+      .map((catKey) => {
+        const count = counts[catKey] || 0;
+        const percentage = (count / total) * 100;
+        const startAngle = (accumulatedPercentage / 100) * 360;
+        accumulatedPercentage += percentage;
 
-      return {
-        id: catKey as WorkCategory,
-        name: CATEGORY_LABELS[catKey as WorkCategory] || catKey,
-        emoji: CATEGORY_EMOJIS[catKey as WorkCategory] || "📝",
-        count,
-        percentage: Math.round(percentage),
-        color: colors[catKey] || "#94a3b8",
-        startAngle,
-      };
-    }).filter(cat => cat.count > 0);
+        return {
+          id: catKey as WorkCategory,
+          name: CATEGORY_LABELS[catKey as WorkCategory] || catKey,
+          emoji: CATEGORY_EMOJIS[catKey as WorkCategory] || "📝",
+          count,
+          percentage: Math.round(percentage),
+          color: colors[catKey] || "#94a3b8",
+          startAngle,
+        };
+      })
+      .filter((cat) => cat.count > 0);
   }, [logs]);
 
   // 3. Generate Github-style Heatmap for the past 30 days
@@ -96,8 +108,11 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
       d.setDate(d.getDate() - i);
       const dateString = d.toDateString();
       const count = logCountsByDate[dateString] || 0;
-      const dayLabel = d.toLocaleDateString([], { month: "short", day: "numeric" });
-      
+      const dayLabel = d.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      });
+
       dates.push({
         dateString,
         count,
@@ -122,8 +137,12 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
           <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
             <Clock className="h-4.5 w-4.5" />
           </div>
-          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">{metrics.totalHours}h</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hours Focused</span>
+          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">
+            {metrics.totalHours}h
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Hours Focused
+          </span>
         </div>
 
         {/* Sessions Completed */}
@@ -131,8 +150,12 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
           <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
             <CheckCircle2 className="h-4.5 w-4.5" />
           </div>
-          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">{metrics.totalSessions}</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Sessions</span>
+          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">
+            {metrics.totalSessions}
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Sessions
+          </span>
         </div>
 
         {/* Focus Streak */}
@@ -140,18 +163,23 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
           <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400">
             <Flame className="h-4.5 w-4.5" />
           </div>
-          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">{metrics.currentStreak}d</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Focus Streak</span>
+          <span className="mt-3 block text-2xl font-bold text-slate-100 tabular-nums">
+            {metrics.currentStreak}d
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Focus Streak
+          </span>
         </div>
       </div>
 
       {/* Visual Analytics Row */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        
         {/* Category breakdown (SVG Donut Chart) */}
         <div className="rounded-[24px] border border-white/5 bg-[rgba(13,20,38,0.45)] p-5 backdrop-blur-xl">
-          <h3 className="mb-4 text-sm font-semibold text-slate-200">Category Ratios</h3>
-          
+          <h3 className="mb-4 text-sm font-semibold text-slate-200">
+            Category Ratios
+          </h3>
+
           {logs.length === 0 ? (
             <div className="flex h-36 items-center justify-center text-xs text-slate-500">
               Complete focus blocks to see ratio charts
@@ -160,7 +188,10 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
             <div className="flex items-center justify-center gap-6">
               {/* Donut SVG */}
               <div className="relative h-[150px] w-[150px]">
-                <svg className="h-full w-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+                <svg
+                  className="h-full w-full -rotate-90"
+                  viewBox={`0 0 ${size} ${size}`}
+                >
                   <circle
                     cx={size / 2}
                     cy={size / 2}
@@ -170,7 +201,8 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
                     strokeWidth="14"
                   />
                   {chartData.map((slice, i) => {
-                    const strokeDashoffset = circumference - (slice.percentage / 100) * circumference;
+                    const strokeDashoffset =
+                      circumference - (slice.percentage / 100) * circumference;
                     return (
                       <circle
                         key={slice.id}
@@ -191,8 +223,12 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
                 </svg>
                 {/* Centered label */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-slate-200">{metrics.totalSessions}</span>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Blocks</span>
+                  <span className="text-xl font-bold text-slate-200">
+                    {metrics.totalSessions}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                    Blocks
+                  </span>
                 </div>
               </div>
 
@@ -200,9 +236,9 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
               <div className="flex flex-col space-y-2">
                 {chartData.map((slice) => (
                   <div key={slice.id} className="flex items-center space-x-2">
-                    <span 
-                      className="h-2.5 w-2.5 rounded-full" 
-                      style={{ backgroundColor: slice.color }} 
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: slice.color }}
                     />
                     <span className="text-[11px] font-medium text-slate-300">
                       {slice.emoji} {slice.percentage}%
@@ -217,8 +253,12 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
         {/* GitHub-style Heatmap */}
         <div className="rounded-[24px] border border-white/5 bg-[rgba(13,20,38,0.45)] p-5 backdrop-blur-xl">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-200">Consistency Grid</h3>
-            <span className="text-[10px] text-slate-500 font-semibold uppercase">Past 30 Days</span>
+            <h3 className="text-sm font-semibold text-slate-200">
+              Consistency Grid
+            </h3>
+            <span className="text-[10px] text-slate-500 font-semibold uppercase">
+              Past 30 Days
+            </span>
           </div>
 
           {/* Grid Cells */}
@@ -227,7 +267,7 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
               // Determine shade of green/cyan based on completion count
               let bgClass = "bg-slate-900 border-white/[0.01]"; // 0 logs
               let shadowClass = "";
-              
+
               if (day.count === 1) {
                 bgClass = "bg-cyan-950/60 border-cyan-800/20";
               } else if (day.count === 2) {
@@ -243,9 +283,13 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
                   title={`${day.dayLabel}: ${day.count} sessions completed`}
                   className={`group relative h-6.5 w-6.5 rounded-md border flex items-center justify-center text-[10px] font-bold transition-all duration-200 hover:scale-108 cursor-pointer ${bgClass} ${shadowClass}`}
                 >
-                  <span className={`transition-opacity duration-200 ${
-                    day.count > 0 ? "opacity-100 text-slate-200" : "opacity-0 group-hover:opacity-100 text-slate-600"
-                  }`}>
+                  <span
+                    className={`transition-opacity duration-200 ${
+                      day.count > 0
+                        ? "opacity-100 text-slate-200"
+                        : "opacity-0 group-hover:opacity-100 text-slate-600"
+                    }`}
+                  >
                     {day.count}
                   </span>
                 </div>
@@ -265,7 +309,6 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
             <span>More active</span>
           </div>
         </div>
-
       </div>
     </div>
   );

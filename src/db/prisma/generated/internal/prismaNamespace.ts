@@ -607,6 +607,7 @@ export type FocusLogScalarFieldEnum = (typeof FocusLogScalarFieldEnum)[keyof typ
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  password: 'password',
   createdAt: 'createdAt'
 } as const
 

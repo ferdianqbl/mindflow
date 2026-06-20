@@ -1,47 +1,45 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { verifyJWT } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "@/components/dashboard-client";
 import { FocusLogItem } from "@/components/timeline";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const token = cookieStore.get("token")?.value;
   
-  // 1. Verify User Session on Server
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+  // 1. Verify custom JWT User Session on Server
+  let user = null;
+  if (token) {
+    user = await verifyJWT(token);
+  }
+
+  if (!user) {
     redirect("/login");
   }
 
-  try {
-    // 2. Self-healing check: Sync user record inside PostgreSQL user table
-    await prisma.user.upsert({
-      where: { id: user.id },
-      update: { email: user.email! },
-      create: { id: user.id, email: user.email! },
-    });
+  let formattedLogs: FocusLogItem[] = [];
 
-    // 3. Retrieve focus logs
+  try {
+    // 2. Retrieve focus logs from local PostgreSQL using the JWT user id
     const initialLogs = await prisma.focusLog.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
 
-    // 4. Map DB date objects to serializable string timestamps for client component
-    const formattedLogs: FocusLogItem[] = initialLogs.map((log) => ({
+    // 3. Map DB date objects to serializable string timestamps for the client layout
+    formattedLogs = initialLogs.map((log) => ({
       id: log.id,
       category: log.category,
       description: log.description,
       durationMinutes: log.durationMinutes,
       createdAt: log.createdAt.toISOString(),
     }));
-
-    return <DashboardClient user={user} initialLogs={formattedLogs} />;
   } catch (dbError) {
-    console.error("Prisma Server-Component fetch failed:", dbError);
-    // Fallback to client layout with empty logs if db is temporarily unresponsive
-    return <DashboardClient user={user} initialLogs={[]} />;
+    console.error("Prisma Server-Component logs fetch failed:", dbError);
+    formattedLogs = [];
   }
+
+  return <DashboardClient user={user} initialLogs={formattedLogs} />;
 }

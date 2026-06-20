@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,17 +12,6 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-
-  // Redirect if already logged in
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.replace("/");
-      }
-    };
-    checkUser();
-  }, [router]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,28 +38,23 @@ export default function RegisterPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        setErrorMsg(error.message);
+      if (!response.ok) {
+        const errData = await response.json();
+        setErrorMsg(errData.error || "Failed to create account");
         setLoading(false);
         return;
       }
 
-      // Check if email confirmation is required or if they are auto-logged in
-      if (data?.session) {
-        router.replace("/");
-        router.refresh();
-      } else {
-        setSuccessMsg("Success! Please check your email inbox to confirm your account registration.");
-        setLoading(false);
-      }
+      router.replace("/");
+      router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
       setErrorMsg(message);

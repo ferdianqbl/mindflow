@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/lib/supabase/server';
+import { verifyJWT } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 // Helper function to authenticate the user using cookies
 async function authenticate() {
   try {
     const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) {
-      return { error: `Unauthorized: ${error?.message || 'Invalid session'}`, status: 401 };
+    const token = cookieStore.get("token")?.value;
+    if (!token) {
+      return { error: 'Unauthorized: Missing session token', status: 401 };
     }
+    
+    const user = await verifyJWT(token);
+    if (!user) {
+      return { error: 'Unauthorized: Invalid or expired session token', status: 401 };
+    }
+    
     return { user };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -29,13 +34,6 @@ export async function GET(req: NextRequest) {
   const user = auth.user!;
 
   try {
-    // Self-healing check: Sync user in PostgreSQL table if missing
-    await prisma.user.upsert({
-      where: { id: user.id },
-      update: { email: user.email! },
-      create: { id: user.id, email: user.email! },
-    });
-
     // Retrieve all logs ordered by creation timestamp
     const logs = await prisma.focusLog.findMany({
       where: { userId: user.id },
@@ -85,13 +83,6 @@ export async function POST(req: NextRequest) {
 
     const parsedDuration = parseInt(durationMinutes, 10);
     const duration = isNaN(parsedDuration) || parsedDuration <= 0 ? 25 : parsedDuration;
-
-    // Self-healing check: Sync user in PostgreSQL table if missing
-    await prisma.user.upsert({
-      where: { id: user.id },
-      update: { email: user.email! },
-      create: { id: user.id, email: user.email! },
-    });
 
     // Create log record
     const log = await prisma.focusLog.create({
