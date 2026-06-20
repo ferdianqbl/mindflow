@@ -14,42 +14,24 @@ import React, { useEffect, useState } from "react";
 
 export type TimerMode = "focus" | "break" | "idle";
 
-interface TimerProps {
-  mode: TimerMode;
-  secondsLeft: number;
-  isRunning: boolean;
-  onStart: () => void;
-  onPause: () => void;
-  onReset: () => void;
-  onSkip: () => void;
-  setSecondsLeft: React.Dispatch<React.SetStateAction<number>>;
-  setMode: React.Dispatch<React.SetStateAction<TimerMode>>;
-  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
-  onFocusComplete: (durationMinutes: number) => void;
-  focusDuration: number;
-  breakDuration: number;
-  onUpdateDurations: (focus: number, breakDur: number) => void;
-}
+import { useMindflowStore } from "@/store/use-mindflow-store";
 
 export const FOCUS_DURATION = 25 * 60; // 25 minutes
 export const BREAK_DURATION = 5 * 60; // 5 minutes
 
-export default function Timer({
-  mode,
-  secondsLeft,
-  isRunning,
-  onStart,
-  onPause,
-  onReset,
-  onSkip,
-  setSecondsLeft,
-  setMode,
-  setIsRunning,
-  onFocusComplete,
-  focusDuration,
-  breakDuration,
-  onUpdateDurations,
-}: TimerProps) {
+export default function Timer() {
+  const mode = useMindflowStore((s) => s.mode);
+  const secondsLeft = useMindflowStore((s) => s.secondsLeft);
+  const isRunning = useMindflowStore((s) => s.isRunning);
+  const focusDuration = useMindflowStore((s) => s.focusDuration);
+  const breakDuration = useMindflowStore((s) => s.breakDuration);
+
+  const start = useMindflowStore((s) => s.start);
+  const pause = useMindflowStore((s) => s.pause);
+  const reset = useMindflowStore((s) => s.reset);
+  const skip = useMindflowStore((s) => s.skip);
+  const tick = useMindflowStore((s) => s.tick);
+  const updateDurations = useMindflowStore((s) => s.updateDurations);
   const [showSettings, setShowSettings] = useState(false);
   const [prevFocusDuration, setPrevFocusDuration] = useState(focusDuration);
   const [prevBreakDuration, setPrevBreakDuration] = useState(breakDuration);
@@ -72,7 +54,7 @@ export default function Timer({
     const min = parseInt(val, 10);
     if (!isNaN(min) && min >= 1 && min <= 60) {
       setBreakInput(min);
-      onUpdateDurations(focusInput * 60, min * 60);
+      updateDurations(focusInput * 60, min * 60);
     } else if (val === "") {
       setBreakInput(0);
     }
@@ -81,7 +63,7 @@ export default function Timer({
   const handleBreakBlur = () => {
     if (breakInput < 1) {
       setBreakInput(5);
-      onUpdateDurations(focusInput * 60, 5 * 60);
+      updateDurations(focusInput * 60, 5 * 60);
     }
   };
 
@@ -147,39 +129,18 @@ export default function Timer({
 
     if (isRunning) {
       interval = setInterval(() => {
-        setSecondsLeft((prev) => {
-          if (prev <= 1) {
-            // Timer Finished
-            setIsRunning(false);
-            playChime();
-
-            if (mode === "focus") {
-              // Trigger accomplishments log overlay callback
-              onFocusComplete(Math.round(focusDuration / 60));
-            } else {
-              // Transition back from break to idle or focus
-              setMode("idle");
-              setSecondsLeft(focusDuration);
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
+        const currentSecondsLeft = useMindflowStore.getState().secondsLeft;
+        if (currentSecondsLeft <= 1) {
+          playChime();
+        }
+        tick();
       }, 1000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [
-    isRunning,
-    mode,
-    setSecondsLeft,
-    setIsRunning,
-    setMode,
-    focusDuration,
-    onFocusComplete,
-  ]);
+  }, [isRunning, tick]);
 
   // Format MM:SS
   const formatTime = (secs: number) => {
@@ -301,7 +262,7 @@ export default function Timer({
       <div className="mt-8 flex items-center space-x-4">
         {/* Reset Trigger */}
         <button
-          onClick={onReset}
+          onClick={reset}
           title="Reset timer"
           className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/5 bg-white/5 text-slate-300 outline-none transition-all duration-200 hover:bg-white/10 hover:text-slate-100 active:scale-95"
         >
@@ -310,7 +271,7 @@ export default function Timer({
 
         {/* Play/Pause Main Trigger */}
         <button
-          onClick={isRunning ? onPause : onStart}
+          onClick={isRunning ? pause : start}
           className={`flex h-16 w-28 items-center justify-center rounded-2xl outline-none transition-all duration-300 active:scale-[0.97] ${
             isRunning
               ? "bg-slate-100 text-[#070a13] shadow-lg shadow-white/10 hover:bg-slate-200"
@@ -340,7 +301,7 @@ export default function Timer({
 
         {/* Skip Trigger */}
         <button
-          onClick={onSkip}
+          onClick={skip}
           title="Skip session"
           className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/5 bg-white/5 text-slate-300 outline-none transition-all duration-200 hover:bg-white/10 hover:text-slate-100 active:scale-95"
         >

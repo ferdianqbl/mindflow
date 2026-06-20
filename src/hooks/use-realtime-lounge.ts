@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { TimerMode } from "@/components/timer";
@@ -13,14 +13,18 @@ export interface LoungeUser {
   endTime: number | null; // Absolute epoch timestamp when the current session finishes
 }
 
+import { useMindflowStore } from "@/store/use-mindflow-store";
+
 export function useRealtimeLounge(
   userId: string | undefined,
-  userEmail: string | undefined,
-  mode: TimerMode,
-  secondsLeft: number,
-  isRunning: boolean
+  userEmail: string | undefined
 ) {
-  const [coWorkers, setCoWorkers] = useState<LoungeUser[]>([]);
+  const mode = useMindflowStore((s) => s.mode);
+  const secondsLeft = useMindflowStore((s) => s.secondsLeft);
+  const isRunning = useMindflowStore((s) => s.isRunning);
+  const setCoWorkers = useMindflowStore((s) => s.setCoWorkers);
+  const coWorkers = useMindflowStore((s) => s.coWorkers);
+
   const channelRef = useRef<RealtimeChannel | null>(null);
   const secondsLeftRef = useRef(secondsLeft);
 
@@ -88,7 +92,7 @@ export function useRealtimeLounge(
         endTime,
       }).catch(console.error);
     }
-  }, [userId, userEmail, mode, isRunning]);
+  }, [userId, userEmail, mode, isRunning, setCoWorkers]);
 
   // Clean up channel on unmount
   useEffect(() => {

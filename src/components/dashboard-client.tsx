@@ -2,7 +2,7 @@
 
 import { ClipboardList, History, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useEffect } from "react";
 
 // Components & Hooks import
 import CoWorkingLounge from "@/components/co-working-lounge";
@@ -11,15 +11,12 @@ import JournalModal, { WorkCategory } from "@/components/journal-modal";
 import PlanModal from "@/components/plan-modal";
 import StandupPanel from "@/components/standup-panel";
 import Timeline, { FocusLogItem } from "@/components/timeline";
-import Timer, {
-  BREAK_DURATION,
-  FOCUS_DURATION,
-  TimerMode,
-} from "@/components/timer";
+import Timer from "@/components/timer";
 import ValidateModal from "@/components/validate-modal";
 import WellnessGuide from "@/components/wellness-guide";
 
 import { useRealtimeLounge } from "@/hooks/use-realtime-lounge";
+import { useMindflowStore } from "@/store/use-mindflow-store";
 
 interface DashboardClientProps {
   user: { id: string; email: string };
@@ -32,194 +29,66 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter();
 
-  // 1. Core Timer and Logs State
-  const [mode, setMode] = useState<TimerMode>("idle");
-  const [focusDuration, setFocusDuration] = useState<number>(FOCUS_DURATION);
-  const [breakDuration, setBreakDuration] = useState<number>(BREAK_DURATION);
-  const [secondsLeft, setSecondsLeft] = useState<number>(FOCUS_DURATION);
-  const [isRunning, setIsRunning] = useState(false);
-  const [logs, setLogs] = useState<FocusLogItem[]>(initialLogs);
-  const [loadingLogs, setLoadingLogs] = useState(false);
+  // 1. Zustand Store State & Actions
+  const mode = useMindflowStore((s) => s.mode);
+  const breakDuration = useMindflowStore((s) => s.breakDuration);
+  const logs = useMindflowStore((s) => s.logs);
+  const loadingLogs = useMindflowStore((s) => s.loadingLogs);
 
-  // 2. UI Modals & Tab State
-  const [isJournalOpen, setIsJournalOpen] = useState(false);
-  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [isValidateModalOpen, setIsValidateModalOpen] = useState(false);
-  const [rightPanelTab, setRightPanelTab] = useState<"timeline" | "standup">(
-    "timeline",
-  );
+  const isJournalOpen = useMindflowStore((s) => s.isJournalOpen);
+  const isPlanModalOpen = useMindflowStore((s) => s.isPlanModalOpen);
+  const isValidateModalOpen = useMindflowStore((s) => s.isValidateModalOpen);
+  const rightPanelTab = useMindflowStore((s) => s.rightPanelTab);
 
-  // 3. Real-time Co-working Presence Hook
-  const { coWorkers } = useRealtimeLounge(
-    user.id,
-    user.email,
-    mode,
-    secondsLeft,
-    isRunning,
-  );
+  const setMode = useMindflowStore((s) => s.setMode);
+  const setSecondsLeft = useMindflowStore((s) => s.setSecondsLeft);
+  const setIsRunning = useMindflowStore((s) => s.setIsRunning);
+  const setLogs = useMindflowStore((s) => s.setLogs);
+  const setJournalOpen = useMindflowStore((s) => s.setJournalOpen);
+  const setPlanModalOpen = useMindflowStore((s) => s.setPlanModalOpen);
+  const setValidateModalOpen = useMindflowStore((s) => s.setValidateModalOpen);
+  const setRightPanelTab = useMindflowStore((s) => s.setRightPanelTab);
 
-  // 5. Timer Control Actions
-  const handleStart = () => {
-    // If starting a fresh session from idle, we need to create plans first!
-    if (mode === "idle") {
-      setIsPlanModalOpen(true);
-      return;
-    }
+  const refreshLogs = useMindflowStore((s) => s.refreshLogs);
+  const submitLog = useMindflowStore((s) => s.submitLog);
+  const startSession = useMindflowStore((s) => s.startSession);
 
-    setIsRunning(true);
-  };
+  // Initialize initial logs loaded from server
+  useEffect(() => {
+    setLogs(initialLogs);
+  }, [initialLogs, setLogs]);
 
-  const handleStartSession = async (
-    plans: Array<{ title: string; category: string; durationMin: number }>,
-  ) => {
-    // 1. Save plans to DB
-    const response = await fetch("/api/plans", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ plans }),
-    });
+  // 2. Real-time Co-working Presence Hook
+  const { coWorkers } = useRealtimeLounge(user.id, user.email);
 
-    if (!response.ok) {
-      const errJson = await response.json();
-      throw new Error(errJson.error || "Failed to save session plans");
-    }
-
-    // 2. Set the focus session duration to the sum of the planned durations
-    const totalMinutes = plans.reduce((acc, curr) => acc + curr.durationMin, 0);
-    const totalSeconds = totalMinutes * 60;
-
-    setFocusDuration(totalSeconds);
-    setSecondsLeft(totalSeconds);
-    setMode("focus");
-    setIsRunning(true);
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-
-    if (mode === "break") {
-      setSecondsLeft(breakDuration);
-    } else {
-      setMode("idle");
-      setSecondsLeft(focusDuration);
-    }
-  };
-
-  const handleSkip = () => {
-    setIsRunning(false);
-
-    if (mode === "focus") {
-      // Skip work -> Start a break
-      setMode("break");
-      setSecondsLeft(breakDuration);
-    } else {
-      // Skip break/idle -> Go to focus idle
-      setMode("idle");
-      setSecondsLeft(focusDuration);
-    }
-  };
-
-  const handleUpdateDurations = (focusSecs: number, breakSecs: number) => {
-    setFocusDuration(focusSecs);
-    setBreakDuration(breakSecs);
-    if (!isRunning) {
-      if (mode === "break") {
-        setSecondsLeft(breakSecs);
-      } else if (mode === "idle" || mode === "focus") {
-        setSecondsLeft(focusSecs);
-      }
-    }
-  };
-
-  // Callback triggered when focus timer hits 0
-  const handleFocusComplete = useCallback(() => {
-    setIsRunning(false);
-    // Open validation review overlay
-    setIsValidateModalOpen(true);
-  }, []);
-
+  // 3. Modal Callback Handlers
   const handleValidationComplete = async () => {
-    // Refresh accomplishments
     await refreshLogs();
-
-    // Transition to break
     setMode("break");
     setSecondsLeft(breakDuration);
     setIsRunning(true);
   };
 
   const handleSkipValidation = () => {
-    setIsValidateModalOpen(false);
-    // Transition to break even if skipped
+    setValidateModalOpen(false);
     setMode("break");
     setSecondsLeft(breakDuration);
     setIsRunning(true);
   };
 
-  // Submit log to database via API
+  const handleSkipLogging = () => {
+    setJournalOpen(false);
+    setMode("break");
+    setSecondsLeft(breakDuration);
+    setIsRunning(true);
+  };
+
   const handleSubmitLog = async (data: {
     category: WorkCategory;
     description: string;
   }) => {
-    try {
-      const response = await fetch("/api/logs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category: data.category,
-          description: data.description,
-          durationMinutes: Math.round(focusDuration / 60),
-        }),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json();
-        throw new Error(errJson.error || "Failed to save log");
-      }
-
-      // Refresh log timeline list
-      await refreshLogs();
-
-      // Automatically transition user into a break
-      setMode("break");
-      setSecondsLeft(breakDuration);
-      setIsRunning(true);
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-  };
-
-  // Fetch updated logs from API
-  const refreshLogs = async () => {
-    setLoadingLogs(true);
-    try {
-      const response = await fetch("/api/logs");
-      if (response.ok) {
-        const json = await response.json();
-        setLogs(json.logs);
-      }
-    } catch (e) {
-      console.error("Failed to refresh logs:", e);
-    } finally {
-      setLoadingLogs(false);
-    }
-  };
-
-  const handleSkipLogging = () => {
-    setIsJournalOpen(false);
-    // Transition to break even if they skip writing a note
-    setMode("break");
-    setSecondsLeft(breakDuration);
-    setIsRunning(true);
+    await submitLog(data.category, data.description);
+    setJournalOpen(false);
   };
 
   const handleLogout = async () => {
@@ -275,22 +144,7 @@ export default function DashboardClient({
           {/* Left Column (Width: 5/12 on Desktop) - Focus Utilities */}
           <div className="space-y-6 md:col-span-5">
             {/* Timer component */}
-            <Timer
-              mode={mode}
-              secondsLeft={secondsLeft}
-              isRunning={isRunning}
-              onStart={handleStart}
-              onPause={handlePause}
-              onReset={handleReset}
-              onSkip={handleSkip}
-              setSecondsLeft={setSecondsLeft}
-              setMode={setMode}
-              setIsRunning={setIsRunning}
-              onFocusComplete={handleFocusComplete}
-              focusDuration={focusDuration}
-              breakDuration={breakDuration}
-              onUpdateDurations={handleUpdateDurations}
-            />
+            <Timer />
 
             {/* Real-time co-working lobby */}
             <CoWorkingLounge coWorkers={coWorkers} />
@@ -320,7 +174,7 @@ export default function DashboardClient({
                 {/* Tab select buttons and Log Accomplishment Button */}
                 <div className="flex items-center space-x-3 self-start">
                   <button
-                    onClick={() => setIsJournalOpen(true)}
+                    onClick={() => setJournalOpen(true)}
                     className="flex items-center space-x-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 text-xs font-semibold text-cyan-400 outline-none transition-all duration-300 hover:bg-cyan-500/20 active:scale-95"
                   >
                     <span>+ Log Accomplishment</span>
@@ -374,20 +228,20 @@ export default function DashboardClient({
       {/* Slide-in Journal Modal Overlay */}
       <JournalModal
         isOpen={isJournalOpen}
-        onClose={() => setIsJournalOpen(false)}
+        onClose={() => setJournalOpen(false)}
         onSubmit={handleSubmitLog}
         onSkip={handleSkipLogging}
       />
 
       <PlanModal
         isOpen={isPlanModalOpen}
-        onClose={() => setIsPlanModalOpen(false)}
-        onStartSession={handleStartSession}
+        onClose={() => setPlanModalOpen(false)}
+        onStartSession={startSession}
       />
 
       <ValidateModal
         isOpen={isValidateModalOpen}
-        onClose={() => setIsValidateModalOpen(false)}
+        onClose={() => setValidateModalOpen(false)}
         onSubmitValidation={handleValidationComplete}
         onSkip={handleSkipValidation}
       />
