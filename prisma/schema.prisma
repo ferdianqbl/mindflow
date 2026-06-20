@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String     @id // Maps to Supabase auth.users.id
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  logs      FocusLog[]
+
+  @@map("users")
+}
+
+model FocusLog {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        String   // e.g. "coding" | "debugging" | "design" | "learning" | "meeting" | "operations"
+  description     String   // Max 140 characters
+  durationMinutes Int      @default(25)
+  createdAt       DateTime @default(now())
+
+  @@map("focus_logs")
+}
