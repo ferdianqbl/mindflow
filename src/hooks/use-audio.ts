@@ -11,8 +11,8 @@ export interface AudioVolumes {
 
 // Copyright-free, looping ambient assets hosted on high-availability CDNs
 const AMBIENT_LINKS = {
-  rain: "https://assets.mixkit.co/active_storage/sfx/2433/2433-500.wav", // Rain loop
-  lofi: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Lofi song backup loop (public test track)
+  rain: "/audio/rain.wav",
+  lofi: "/audio/lofi.mp3",
 };
 
 export function useAudio() {
@@ -58,7 +58,6 @@ export function useAudio() {
     // 3. Initialize Rain Audio Element & Gain
     const rainEl = new Audio(AMBIENT_LINKS.rain);
     rainEl.loop = true;
-    rainEl.crossOrigin = "anonymous";
     const rainSource = ctx.createMediaElementSource(rainEl);
     const rainGainNode = ctx.createGain();
     rainGainNode.gain.value = volumes.rain;
@@ -71,7 +70,6 @@ export function useAudio() {
     // 4. Initialize Lofi Audio Element & Gain
     const lofiEl = new Audio(AMBIENT_LINKS.lofi);
     lofiEl.loop = true;
-    lofiEl.crossOrigin = "anonymous";
     const lofiSource = ctx.createMediaElementSource(lofiEl);
     const lofiGainNode = ctx.createGain();
     lofiGainNode.gain.value = volumes.lofi;
