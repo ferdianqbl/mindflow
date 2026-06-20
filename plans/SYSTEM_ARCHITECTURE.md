@@ -14,8 +14,8 @@ We implement Mindflow as a full-stack web application using a modern, serverless
     *   *Rationale*: Generous free tier, reliable managed SQL database, and support for high-concurrency client connections.
 *   **Database ORM**: **Prisma**
     *   *Rationale*: Type-safe client queries and automated schema migration workflows. Uses `@prisma/adapter-pg` driver to connect via pooled configurations.
-*   **User Authentication**: **Supabase Auth & SSR**
-    *   *Rationale*: Offloads password hashing, email verification, and session token storage using `@supabase/ssr` to securely store tokens in cookies.
+*   **User Authentication**: **Self-Hosted Custom JWT Authentication**
+    *   *Rationale*: Secure password hashing on-server via `bcryptjs` and session tokens signed and verified using edge-compatible `jose`. Session tokens are stored in secure, HTTP-only client cookies.
 *   **Real-time Syncer**: **Supabase Realtime (Presence & Broadcast)**
     *   *Rationale*: Connects online users on a shared WebSocket channel to sync Pomodoro states and presence dynamically.
 
@@ -41,16 +41,34 @@ generator client {
 ### B. User Entity (`user.prisma`)
 ```prisma
 model User {
-  id        String     @id // Maps to Supabase auth.users.id (UUID string)
+  id        String     @id
   email     String     @unique
+  password  String
   createdAt DateTime   @default(now())
   logs      FocusLog[]
+  plans     TaskPlan[]
 
   @@map("users")
 }
 ```
 
-### C. Focus Log Entity (`focus-log.prisma`)
+### C. Task Plan Entity (`task-plan.prisma`)
+```prisma
+model TaskPlan {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String   // e.g. "coding" | "debugging" | "design" | "learning" | "meeting" | "operations"
+  title       String   // Task description
+  durationMin Int      // Planned duration in minutes
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("task_plans")
+}
+```
+
+### D. Focus Log Entity (`focus-log.prisma`)
 ```prisma
 model FocusLog {
   id              String   @id @default(uuid())
@@ -69,7 +87,7 @@ model FocusLog {
 
 ## 3. Directory Layout
 
-All filenames and folders are structured in kebab-case and conform to the custom Supabase and Prisma configurations:
+All filenames and folders are structured in kebab-case and conform to the custom configurations:
 
 ```
 mindflow/
@@ -87,12 +105,25 @@ mindflow/
     │   ├── register/
     │   │   └── page.tsx        # Registration layout
     │   └── api/                # API routes
-    │       └── logs/
-    │           └── route.ts    # GET (fetch user logs) & POST (write log)
+    │       ├── auth/
+    │       │   ├── login/
+    │       │   │   └── route.ts # JWT Login route (sets cookie)
+    │       │   ├── logout/
+    │       │   │   └── route.ts # JWT Logout route (clears cookie)
+    │       │   └── register/
+    │       │       └── route.ts # JWT Registration route
+    │       ├── logs/
+    │       │   └── route.ts    # GET (fetch accomplishments) & POST (write log)
+    │       └── plans/
+    │           ├── route.ts    # GET (fetch incomplete plans) & POST (sync active plans)
+    │           └── validate/
+    │               └── route.ts # POST (check off completed tasks & log to FocusLog)
     ├── components/             # UI Components
     │   ├── timer.tsx           # Countdown circular SVG timer
     │   ├── audio-mixer.tsx     # Soundboard volume dials
-    │   ├── journal-modal.tsx   # Slide-in accomplishment journal form
+    │   ├── plan-modal.tsx      # Modal to build session plans before starting
+    │   ├── validate-modal.tsx  # Modal to review and validate completed session tasks
+    │   ├── journal-modal.tsx   # Modal for quick manual accomplishment logs
     │   ├── timeline.tsx        # Chronicled timeline of focus blocks
     │   ├── standup-panel.tsx   # Copy standup format selectors
     │   ├── wellness-guide.tsx  # Breathing circle guide for breaks
@@ -103,19 +134,18 @@ mindflow/
     │       ├── schema/         # Multi-file schema directory
     │       │   ├── index.prisma
     │       │   ├── user.prisma
+    │       │   ├── task-plan.prisma
     │       │   └── focus-log.prisma
     │       ├── migrations/     # Generated SQL migration history files
     │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/
-    │   ├── use-audio.ts        # Handles noise synth and lofi loops
+    │   ├── use-audio.ts        # Handles noise synth and same-origin lofi loops
     │   └── use-realtime-lounge.ts # Handles Supabase Realtime channel presence
     ├── lib/
     │   ├── prisma/
     │   │   └── index.ts        # Prisma Client singleton connecting via pg adapter
-    │   └── supabase/           # Supabase SSR cookie wrappers
-    │       ├── client.ts       # Browser-side API client
-    │       ├── server.ts       # Server-side API client
-    │       └── middleware.ts   # Session refresh cookies middleware
+    │   └── auth.ts             # Password hash & JWT sign/verify helper methods
+    ├── proxy.ts                # Middleware routing proxy guarding cookie-auth routes
     └── utils/
         ├── formatters.ts       # Standup text compilers (Slack, YTB, Markdown)
         └── noise-generator.ts  # Synthesizes brown frequency noise
@@ -127,4 +157,4 @@ mindflow/
 
 *   **Hosting Platform**: Vercel (Frontend & Serverless API routes).
 *   **Database Host**: Supabase (AWS / PostgreSQL instance).
-*   **State Sync**: Next.js serverless functions query Prisma/PostgreSQL for logs, while browser-side Supabase Clients connect to WebSockets directly for Auth and Realtime Presence.
+*   **State Sync**: Next.js serverless functions query Prisma/PostgreSQL for logs and plans, while browser-side Supabase Clients connect to WebSockets directly for Realtime Lounge Presence syncing.

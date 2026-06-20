@@ -1,57 +1,69 @@
 # Product Requirements Document (PRD) - Mindflow (Co-Working Edition)
 
 ## 1. Product Overview
-**Mindflow (Co-Working Edition)** is a premium full-stack web dashboard that combines an ambient Pomodoro focus timer with prompt-based micro-journaling and collaborative co-working features. 
+**Mindflow (Co-Working Edition)** is a premium full-stack web dashboard that combines structured focus session planning, an ambient Pomodoro timer, task validation, micro-journaling, and collaborative co-working features.
 
-Unlike passive focus timers, Mindflow prompts users to log a 1-sentence achievement immediately upon session completion, storing logs in a persistent database. It compiles these achievements into professional, copyable standup updates (Slack, Discord, Markdown). Additionally, it features a **Co-Focusing Lounge** where users can see other active members working in real-time, boosting motivation through accountability.
+Unlike passive focus timers, Mindflow requires users to build a session task plan before starting the timer. When the session ends, the user is prompted to check off completed tasks—which are automatically logged as accomplishments in a persistent database—while incomplete tasks carry over to the next session. These achievements can then be compiled into copyable daily standup updates (Slack, Discord, Markdown). Additionally, a **Co-Focusing Lounge** displays online members working in real-time to drive accountability.
 
 ---
 
 ## 2. Core User Journeys
 
 *   **User Registration & Authentication**:
-    *   A user signs up or logs in securely via email and password using **Supabase Auth**.
-    *   They are redirected to their personalized dashboard, restoring all historical focus records.
+    *   A user signs up or logs in securely via email and password.
+    *   Auth uses a custom, self-hosted JWT authentication flow (session tokens stored in HTTP-only cookies).
+*   **Structured Focus Session Planning**:
+    *   Before starting the timer, the user is presented with a **Plan Your Session** modal listing any carried-over incomplete tasks.
+    *   The user reviews, adds, or edits tasks (assigning categories and estimated durations in minutes).
+    *   Starting the session sets the timer countdown to the sum of the planned tasks.
 *   **Ambient Focus Session**:
-    *   The user starts a focus block (25 minutes). Ambient audio loops in the background (Rain, Lofi Cafe, synthesized Brown Noise).
-    *   During focus, their co-working status shifts to `Focusing` with their live countdown timer synced to the co-working channel.
-*   **Accomplishment Logging**:
-    *   At the end of the focus block, a glassmorphic journal modal slides in. The user tags a category (Coding, Debugging, Design, etc.) and writes a 1-sentence log (max 140 chars).
-    *   Submitting the log saves it to the **Supabase PostgreSQL** database via **Prisma ORM**.
+    *   The user focuses while ambient audio loops in the background (Rain, Lofi Cafe, and synthesized Brown Noise).
+    *   Their status changes to `Focusing`, and their live timer countdown syncs to the co-working lounge.
+*   **Task Validation & Accomplishment Logging**:
+    *   At the end of the focus block, a **Session Review** modal slides in. The user checks off finished tasks.
+    *   Completed tasks are written to the `FocusLog` accomplishments database via Prisma.
+    *   Unfinished tasks are preserved in `TaskPlan` to automatically carry over to the next session.
 *   **Rest & Ergonomics Guide**:
     *   A 5-minute break starts automatically. Their status changes to `Resting`.
     *   A smooth breathing SVG bubble guides them through micro-breaks.
 *   **Analytics Dashboard**:
     *   The user reviews their focus analytics: total sessions, time focused, category breakdown charts, and progress timeline.
     *   They can export their daily logs into formatted text (Slack, Markdown) with a copy success alert.
-*   **Co-Focusing Lounge**:
-    *   The user joins a real-time lobby where they see active cards of other online users, their current status (`Focusing`, `Resting`, `Idle`), and how many minutes remain in their session.
 
 ---
 
 ## 3. Functional Requirements
 
-### User Authentication (Supabase Auth)
+### User Authentication (Custom JWT)
 *   Email and password sign-up, sign-in, and sign-out.
-*   Protected route guarding (anonymous users redirected to `/login`).
+*   Cryptographic password hashing using `bcryptjs` and session tokens signed using `jose`.
+*   Protected route guarding (anonymous users redirected to `/login` via middleware/proxy).
 
 ### Database Logging (Prisma + PostgreSQL)
-*   Every completed session creates a row in the `FocusLog` table:
+*   **TaskPlan** table tracks planned session tasks:
     *   `id`: Primary key (UUID).
-    *   `userId`: Foreign key mapping to user auth.
+    *   `userId`: Foreign key mapping to user.
     *   `category`: String tag enum (Coding, Debugging, UI/UX, Learning, Meeting, Operations).
-    *   `description`: String, max 140 chars.
-    *   `durationMinutes`: Integer (default 25).
+    *   `title`: String, task description.
+    *   `durationMin`: Integer, planned minutes.
+    *   `isCompleted`: Boolean (default `false`).
+    *   `createdAt`: Timestamp.
+*   **FocusLog** table tracks completed accomplishments:
+    *   `id`: Primary key (UUID).
+    *   `userId`: Foreign key mapping to user.
+    *   `category`: String tag enum.
+    *   `description`: String, accomplishment description.
+    *   `durationMinutes`: Integer, actual minutes spent.
     *   `createdAt`: Timestamp.
 
 ### Analytics Dashboard
 *   Fetch and aggregate historical logs:
     *   Total focused hours and completed sessions.
-    *   Categorized percentage chart (SVG-based or light canvas chart).
+    *   Categorized percentage chart (SVG-based donut chart).
     *   Daily timeline feed of logs.
 *   Export standup text with Slack-styled emoji grouping and Markdown.
 
 ### Real-Time Co-Working Lounge
 *   Uses **Supabase Realtime (Presence & Broadcast)** to track connected client states.
 *   Each user broadcasts their profile username, current state (`focus` | `break` | `idle`), and `secondsLeft` on their timer.
-*   Online user listing updates dynamically (users who close the tab disappear from the list).
+*   Online user listing updates dynamically.
