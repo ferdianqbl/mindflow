@@ -58,9 +58,10 @@ Unlike passive focus timers, Mindflow requires users to build a session task pla
 
 ### Analytics Dashboard
 *   Fetch and aggregate historical logs:
-    *   Total focused hours and completed sessions.
+    *   Total focused hours and sessions.
     *   Categorized percentage chart (SVG-based donut chart).
     *   Daily timeline feed of logs.
+    *   Filter statistics/donut charts by Daily (Today), Weekly, Monthly, and YTD (Year-to-Date) ranges.
 *   Export standup text with Slack-styled emoji grouping and Markdown.
 
 ### Real-Time Co-Working Lounge

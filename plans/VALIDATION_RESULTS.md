@@ -19,7 +19,7 @@ This document presents the verification and validation tracker of all applicatio
 | **Timeline Feed** | Chronological list feed showing achievements of the current day | **Passed** | `src/components/timeline.tsx` |
 | **Standup Compiler** | Dynamic templates (Slack, YTB, Bullet) aggregating logged accomplishments | **Passed** | `src/utils/formatters.ts`, `src/components/standup-panel.tsx` |
 | **Realtime Presence** | Sync online users, active states, and timer countdowns | **Passed** | `src/hooks/use-realtime-lounge.ts` |
-| **Analytics Dashboard**| Draw custom SVG donut charts and grids for user logs breakdown | **Passed** | `src/components/dashboard-stats.tsx` |
+| **Analytics Dashboard**| Draw custom SVG donut charts and grids for user logs breakdown, with Daily/Weekly/Monthly/YTD range filtering | **Passed** | `src/components/dashboard-stats.tsx` |
 | **State Management** | Centralized global store managing Pomodoro states, achievements, UI modals, and co-worker lounge lists | **Passed** | `src/store/use-mindflow-store.ts`, `src/hooks/use-realtime-lounge.ts` |
 
 ---
@@ -49,10 +49,14 @@ This document presents the verification and validation tracker of all applicatio
     *   Start a focus timer in Browser A. Verify that Browser B instantly displays User A's status as `Focusing` with their timer counting down in sync.
     *   Close Browser A. Verify that Browser B removes User A from the Lounge list within 5-10 seconds.
 
-### 5. Interactive SVG Analytics
+### 5. Interactive SVG Analytics & Range Filtering
 *   **Verification Method**: Complete multiple focus logs across different categories. Open the statistics dashboard. Verify that:
     *   The SVG donut chart recalculates slice strokes to correctly represent the percentage ratios of logged categories.
     *   The daily square grid highlights the correct day matching the completed focus session logs.
+*   **Verification Method**: Click on the Filter buttons (Daily, Weekly, Monthly, YTD, All Time):
+    *   Verify that the "Hours Focused" and "Sessions" totals recalculate instantly.
+    *   Verify that the category ratios donut chart redrafts segments dynamically according to the range logs.
+    *   Verify that the Consistency Grid adjusts cell count and highlights only the date blocks within the selected range (e.g. today showing 1 cell, weekly showing 7 cells).
 
 ### 6. Centralized State Management (Zustand)
 *   **Verification Method**: Verify that changing focus plans, ticking, completing sessions, opening modals, and switching tabs update instantly and consistently across the interface with no local state lags.

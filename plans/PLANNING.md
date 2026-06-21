@@ -59,6 +59,7 @@ This document indexes all documentation files for the full-stack edition of **Mi
 ### Phase 8: Analytics & SVG Heatmaps
 *   [x] Create dashboard stats panel (`dashboard-stats.tsx`).
 *   [x] Render custom responsive SVG donut charts for categories and cell grid maps for daily heatmaps.
+*   [x] Add filtering controls to switch reports/donut charts between Daily, Weekly, Monthly, and YTD scopes.
 *   [x] Conduct responsive design auditing and deploy to Vercel.
 
 ### Phase 9: Structured Focus Session Planning & Task Validation
