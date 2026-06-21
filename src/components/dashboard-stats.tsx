@@ -3,7 +3,7 @@
 import { WorkCategory } from "@/components/journal-modal";
 import { CATEGORY_EMOJIS, CATEGORY_LABELS } from "@/utils/formatters";
 import { CheckCircle2, Clock, Flame } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FocusLogItem } from "./timeline";
 
 interface DashboardStatsProps {
@@ -11,16 +11,53 @@ interface DashboardStatsProps {
 }
 
 export default function DashboardStats({ logs }: DashboardStatsProps) {
+  const [activeFilter, setActiveFilter] = useState<"today" | "week" | "month" | "ytd" | "all">("all");
+
+  // Filter logs based on active selection
+  const filteredLogs = useMemo(() => {
+    const now = new Date();
+    
+    // Reset hours to start of today
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Start of week (Sunday as start)
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
+
+    // Start of month
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Start of year (YTD)
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    return logs.filter((log) => {
+      const logDate = new Date(log.createdAt);
+      if (activeFilter === "today") {
+        return logDate >= startOfToday;
+      }
+      if (activeFilter === "week") {
+        return logDate >= startOfWeek;
+      }
+      if (activeFilter === "month") {
+        return logDate >= startOfMonth;
+      }
+      if (activeFilter === "ytd") {
+        return logDate >= startOfYear;
+      }
+      return true; // "all"
+    });
+  }, [logs, activeFilter]);
+
   // 1. Calculate Core Metrics
   const metrics = useMemo(() => {
-    const totalSessions = logs.length;
-    const totalMinutes = logs.reduce(
+    const totalSessions = filteredLogs.length;
+    const totalMinutes = filteredLogs.reduce(
       (sum, log) => sum + log.durationMinutes,
       0,
     );
     const totalHours = (totalMinutes / 60).toFixed(1);
 
-    // Calculate Focus Streak (Consecutive days focusing, starting from today/yesterday)
+    // Calculate Focus Streak (always calculated on full logs history to preserve streak data)
     let currentStreak = 0;
     if (logs.length > 0) {
       const logDates = new Set(
@@ -28,7 +65,6 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
       );
 
       const checkDate = new Date();
-      // Check if they focused today. If not, check if they focused yesterday to preserve the streak.
       if (!logDates.has(checkDate.toDateString())) {
         checkDate.setDate(checkDate.getDate() - 1);
       }
@@ -44,16 +80,16 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
       totalHours,
       currentStreak,
     };
-  }, [logs]);
+  }, [filteredLogs, logs]);
 
   // 2. Calculate Category Ratios for Donut Chart
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
-    logs.forEach((log) => {
+    filteredLogs.forEach((log) => {
       counts[log.category] = (counts[log.category] || 0) + 1;
     });
 
-    const total = logs.length || 1;
+    const total = filteredLogs.length || 1;
     const categoriesList = [
       "coding",
       "debugging",
@@ -90,20 +126,32 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
         };
       })
       .filter((cat) => cat.count > 0);
-  }, [logs]);
+  }, [filteredLogs]);
 
-  // 3. Generate Github-style Heatmap for the past 30 days
+  // 3. Generate Github-style Heatmap matching filter range
   const heatmapData = useMemo(() => {
     const dates: { dateString: string; count: number; dayLabel: string }[] = [];
     const logCountsByDate: Record<string, number> = {};
 
-    logs.forEach((log) => {
+    filteredLogs.forEach((log) => {
       const dateStr = new Date(log.createdAt).toDateString();
       logCountsByDate[dateStr] = (logCountsByDate[dateStr] || 0) + 1;
     });
 
-    // Generate past 30 days chronologically
-    for (let i = 29; i >= 0; i--) {
+    // Determine grid range based on filter
+    let daysToRender = 30;
+    if (activeFilter === "today") {
+      daysToRender = 1;
+    } else if (activeFilter === "week") {
+      daysToRender = 7;
+    } else if (activeFilter === "month") {
+      // Days in current month up to today
+      const now = new Date();
+      daysToRender = now.getDate();
+    }
+
+    // Generate days chronologically
+    for (let i = daysToRender - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateString = d.toDateString();
@@ -121,15 +169,50 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
     }
 
     return dates;
-  }, [logs]);
+  }, [filteredLogs, activeFilter]);
 
   // Circular SVG Donut Geometry parameters
   const size = 180;
   const radius = 65;
   const circumference = 2 * Math.PI * radius; // ~408.4
 
+  const filterOptions = [
+    { id: "today" as const, label: "Daily" },
+    { id: "week" as const, label: "Weekly" },
+    { id: "month" as const, label: "Monthly" },
+    { id: "ytd" as const, label: "YTD" },
+    { id: "all" as const, label: "All Time" },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Filters bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[20px] border border-white/5 bg-[rgba(13,20,38,0.25)] p-4 backdrop-blur-md">
+        <div>
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+            Focus Metrics
+          </h3>
+          <p className="text-[10px] text-slate-400">
+            View aggregates and category stats by time range
+          </p>
+        </div>
+        <div className="flex space-x-1 rounded-lg bg-slate-950/40 p-1 border border-white/5">
+          {filterOptions.map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => setActiveFilter(opt.id)}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-all duration-300 ${
+                activeFilter === opt.id
+                  ? "bg-slate-800 text-slate-100 shadow-md"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 3-Column Stats Grid */}
       <div className="grid grid-cols-3 gap-4">
         {/* Total Hours */}
@@ -257,7 +340,13 @@ export default function DashboardStats({ logs }: DashboardStatsProps) {
               Consistency Grid
             </h3>
             <span className="text-[10px] text-slate-500 font-semibold uppercase">
-              Past 30 Days
+              {activeFilter === "today"
+                ? "Today"
+                : activeFilter === "week"
+                  ? "Past 7 Days"
+                  : activeFilter === "month"
+                    ? "This Month"
+                    : "Past 30 Days"}
             </span>
           </div>
 
