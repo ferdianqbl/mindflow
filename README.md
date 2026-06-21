@@ -128,15 +128,15 @@ Standard Pomodoro apps exist, but they are passive and don't record outcomes. He
 
 ### 5. What you put in scope, what you left out, and why
 
-*   **In Scope**: I prioritized a premium glassmorphic dark UI to make the workspace look and feel inspiring to live in. Technically, I focused on completing the core feedback loop: task planning (so you don't start a passive timer), session validation (to check off completed work), a custom cookie-based JWT authentication, a real-time lobby, and a central Zustand store.
+*   **In Scope**: I prioritized the core workflow loop: structured task planning (making sure you work with intent), active Pomodoro countdowns, task validation check-offs upon session end, manual accomplishment logging, a co-working lobby to view teammate statuses, and the multi-template standup report compiler.
 *   **Left Out**:
-    *   *OAuth Integrations (GitHub/Google)*: I intentionally skipped third-party OAuth to avoid API key setup friction during local review. I instead built a standard, self-contained email/password signup flow using hashed password validation.
-    *   *Direct Integrations (Slack webhooks / Jira)*: Setting up direct webhook channels requires API credentials and tokens. To keep things zero-config, I built a one-click "Copy Report" compiler with support for multiple clean templates (Slack, YTB, Markdown) instead.
+    *   *Third-Party Calendar & Task Sync (Jira/Google Calendar)*: I left this out to keep the user experience completely self-contained. I wanted users to be able to plan sessions and compile reports immediately without needing to go through complex setup or link external accounts.
+    *   *Ambient Mixer Soundscapes*: I chose to focus on the core productivity loop and reporting metrics rather than complex audio mixers and sound loops.
 
 ### 6. Where you didn't have answers, what you assumed
 
-*   *Lounge Privacy vs. Transparency*: I wasn't sure if users would want their exact task descriptions visible to coworkers in the lounge. I assumed that displaying just their active Pomodoro mode (`Focusing`, `Resting`, `Idle`) and countdown timer provides the perfect balance of peer accountability without invading individual privacy.
-*   *WebSocket Scale & Rate Limits*: High-concurrency WebSocket channels (like Supabase Presence) can easily hit rate limits and lag if they broadcast countdown seconds (`secondsLeft`) every single second for multiple users. I assumed that Observers only need to receive a user's absolute end time (`endTime`) when their state changes (start, pause, reset, skip). Observers then calculate the remaining ticking digits locally client-side, saving substantial network bandwidth.
+*   *Co-Working Task Privacy*: I wasn't sure if users would feel comfortable showing the exact titles of their private work tasks to peers in the co-working lounge. I assumed that displaying only their high-level status (`Focusing`, `Resting`, `Idle`) and countdown timers would provide motivational peer accountability without exposing private project details.
+*   *Time Filter Scopes*: I assumed that when users want to review their statistics, they need to compare their performance over different cycles. Therefore, I built the metrics panel to dynamically filter totals (hours and sessions) and category donut charts by Daily, Weekly, Monthly, and YTD scopes.
 
 ### 7. Three questions you'd ask a real user before building more
 
