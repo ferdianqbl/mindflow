@@ -36,6 +36,17 @@ export default function StandupPanel({ logs }: StandupPanelProps) {
       await navigator.clipboard.writeText(text);
       setCopied(true);
 
+      // Log the copy event to database analytics asynchronously
+      fetch("/api/logs/copy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ format: activeTab }),
+      }).catch((err) => {
+        console.error("Failed to log copy event:", err);
+      });
+
       // Trigger satisfying particle confetti explosion!
       confetti({
         particleCount: 80,

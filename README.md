@@ -135,16 +135,29 @@ Standard Pomodoro apps exist, but they are passive and don't record outcomes. He
 
 ### 6. Where you didn't have answers, what you assumed
 
-*   *Co-Working Task Privacy*: I wasn't sure if users would feel comfortable showing the exact titles of their private work tasks to peers in the co-working lounge. I assumed that displaying only their high-level status (`Focusing`, `Resting`, `Idle`) and countdown timers would provide motivational peer accountability without exposing private project details.
-*   *Time Filter Scopes*: I assumed that when users want to review their statistics, they need to compare their performance over different cycles. Therefore, I built the metrics panel to dynamically filter totals (hours and sessions) and category donut charts by Daily, Weekly, Monthly, and YTD scopes.
+*   *Standup Compilation Timing (Our Main Goal)*: I wasn't sure when the best time to capture work details was without disrupting the user's focus. I assumed that prompting reflection *only* when the timer ends is the sweet spot: the user's memory is freshest, they are entering a natural break state, and it prevents them from having to recall details at the end of the day.
+*   *Carry-Over Mechanics (Main Feature)*: I assumed that users often underestimate how long a task will take and would feel frustrated if incomplete tasks disappeared. I assumed that automatically carrying over unfinished session plans to the next Pomodoro block keeps their momentum going and minimizes planning fatigue.
+*   *Lounge Accountability (Main Feature)*: I assumed that users want peer motivation to stay focused but do not want active social distractions (like group chats) during focus blocks. I assumed that showing high-level status cards (`Focusing`, `Resting`, `Idle`) and live countdowns is sufficient to drive mutual accountability.
 
 ### 7. Three questions you'd ask a real user before building more
 
-1.  _"Would you prefer to sync your logs with local Git commits automatically so you don't even have to type?"_
-2.  _"Would a browser extension or IDE widget be more useful than a web page to keep the timer visible while coding?"_
-3.  _"Do you want to see team-level statistics and aggregated analytics, or is solo-reporting privacy a priority?"_
+1.  _"Does estimated task duration in the session planner help you budget focus time, or would you prefer a simple check-off list without minute limits?"_
+2.  _"How does seeing other users' status (Focusing/Resting/Idle) in the co-working lounge affect your focus? Would you want collaborative targets or group blocks?"_
+3.  _"Does the standup compiler output match your team's standup format, and would you want direct integration like sending reports to Slack/Jira channels?"_
 
 ### 8. How you'd know it's working, and what you'd do next
 
-- _Indicator of success_: Users copy their standup compiled text on average 4.5 times a week, and maintain focus streaks of 3+ days.
-- _Next Steps_: Implement integrations with Slack/Discord webhooks so logs are sent directly to channels upon clicking "Copy".
+*   **Indicators of Success**:
+    *   *Daily Standup Copies*: Users copying their compiled report text on average 4.5 times a week.
+        *   *Reason*: Actively using the compiler daily proves that the tool successfully removes their manual standup friction, saving them significant administrative overhead.
+    *   *Focus Streaks of 3+ Days*: Users maintaining focus streaks of consecutive working days.
+        *   *Reason*: Streak consistency demonstrates that the peer lounge and planning mechanics are working to build focus habits and drive developer accountability.
+*   **Next Steps**:
+    *   *Weekly & Monthly Planning Boards*: Expand the task planner to support setting high-level weekly and monthly goals.
+        *   *Reason*: Helps users align their immediate 25-minute Pomodoro sessions with their long-term weekly milestones and monthly project deliverables directly inside the dashboard.
+    *   *Retroactive Log Calendar & Editor*: Build a calendar-based log editor directly inside the dashboard.
+        *   *Reason*: Allows users to retroactively add, delete, or adjust historical focus sessions and task categories in-app if they made mistakes or forgot to track a session.
+    *   *Focus Streak Achievements & Milestones*: Build a gamified leveling and badging dashboard panel.
+        *   *Reason*: Increases long-term user retention and engagement directly within the app by rewarding streaks with visual milestones and level-ups.
+    *   *Direct Slack/Discord Webhooks integration*: Add a simple webhook configurator inside settings to send standup logs.
+        *   *Reason*: Closes the reporting feedback loop by publishing completed standup updates directly to Slack with a single click from the dashboard.

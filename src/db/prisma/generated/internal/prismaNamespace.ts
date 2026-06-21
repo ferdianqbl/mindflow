@@ -384,6 +384,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  CopyLog: 'CopyLog',
   FocusLog: 'FocusLog',
   TaskPlan: 'TaskPlan',
   User: 'User'
@@ -402,10 +403,84 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "focusLog" | "taskPlan" | "user"
+    modelProps: "copyLog" | "focusLog" | "taskPlan" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    CopyLog: {
+      payload: Prisma.$CopyLogPayload<ExtArgs>
+      fields: Prisma.CopyLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CopyLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CopyLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        findFirst: {
+          args: Prisma.CopyLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CopyLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        findMany: {
+          args: Prisma.CopyLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>[]
+        }
+        create: {
+          args: Prisma.CopyLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        createMany: {
+          args: Prisma.CopyLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CopyLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>[]
+        }
+        delete: {
+          args: Prisma.CopyLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        update: {
+          args: Prisma.CopyLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.CopyLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CopyLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CopyLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.CopyLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CopyLogPayload>
+        }
+        aggregate: {
+          args: Prisma.CopyLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCopyLog>
+        }
+        groupBy: {
+          args: Prisma.CopyLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CopyLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CopyLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CopyLogCountAggregateOutputType> | number
+        }
+      }
+    }
     FocusLog: {
       payload: Prisma.$FocusLogPayload<ExtArgs>
       fields: Prisma.FocusLogFieldRefs
@@ -667,6 +742,16 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const CopyLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  format: 'format',
+  createdAt: 'createdAt'
+} as const
+
+export type CopyLogScalarFieldEnum = (typeof CopyLogScalarFieldEnum)[keyof typeof CopyLogScalarFieldEnum]
+
+
 export const FocusLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -739,20 +824,6 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -763,6 +834,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -896,6 +981,7 @@ export type PrismaClientOptions = ({
   queryPlanCacheMaxSize?: number
 }
 export type GlobalOmitConfig = {
+  copyLog?: Prisma.CopyLogOmit
   focusLog?: Prisma.FocusLogOmit
   taskPlan?: Prisma.TaskPlanOmit
   user?: Prisma.UserOmit

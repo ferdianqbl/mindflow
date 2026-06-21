@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/CopyLog'
 export type * from './models/FocusLog'
 export type * from './models/TaskPlan'
 export type * from './models/User'

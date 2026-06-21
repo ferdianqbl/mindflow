@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  CopyLog: 'CopyLog',
   FocusLog: 'FocusLog',
   TaskPlan: 'TaskPlan',
   User: 'User'
@@ -70,6 +71,16 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const CopyLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  format: 'format',
+  createdAt: 'createdAt'
+} as const
+
+export type CopyLogScalarFieldEnum = (typeof CopyLogScalarFieldEnum)[keyof typeof CopyLogScalarFieldEnum]
 
 
 export const FocusLogScalarFieldEnum = {

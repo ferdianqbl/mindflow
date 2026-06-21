@@ -1,0 +1,9 @@
+model CopyLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format    String   // e.g. "slack" | "ytb" | "markdown"
+  createdAt DateTime @default(now())
+
+  @@map("copy_logs")
+}
