@@ -55,6 +55,11 @@ Unlike passive focus timers, Mindflow requires users to build a session task pla
     *   `description`: String, accomplishment description.
     *   `durationMinutes`: Integer, actual minutes spent.
     *   `createdAt`: Timestamp.
+*   **CopyLog** table tracks clipboard copy actions for report compilation analytics:
+    *   `id`: Primary key (UUID).
+    *   `userId`: Foreign key mapping to user.
+    *   `format`: String format type (Slack, YTB, Markdown).
+    *   `createdAt`: Timestamp.
 
 ### Analytics Dashboard
 *   Fetch and aggregate historical logs:

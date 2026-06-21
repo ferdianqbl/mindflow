@@ -18,6 +18,7 @@ This document presents the verification and validation tracker of all applicatio
 | **Log Validation** | Lock check-ins to maximum 140 characters with category tag requirements | **Passed** | `src/components/journal-modal.tsx`, `src/app/api/logs/route.ts` |
 | **Timeline Feed** | Chronological list feed showing achievements of the current day | **Passed** | `src/components/timeline.tsx` |
 | **Standup Compiler** | Dynamic templates (Slack, YTB, Bullet) aggregating logged accomplishments | **Passed** | `src/utils/formatters.ts`, `src/components/standup-panel.tsx` |
+| **Standup Copy Analytics**| Log clipboard copy events to PostgreSQL database via API endpoint | **Passed** | `src/app/api/logs/copy/route.ts`, `src/components/standup-panel.tsx` |
 | **Realtime Presence** | Sync online users, active states, and timer countdowns | **Passed** | `src/hooks/use-realtime-lounge.ts` |
 | **Analytics Dashboard**| Draw custom SVG donut charts and grids for user logs breakdown, with Daily/Weekly/Monthly/YTD range filtering | **Passed** | `src/components/dashboard-stats.tsx` |
 | **State Management** | Centralized global store managing Pomodoro states, achievements, UI modals, and co-worker lounge lists | **Passed** | `src/store/use-mindflow-store.ts`, `src/hooks/use-realtime-lounge.ts` |
@@ -61,3 +62,7 @@ This document presents the verification and validation tracker of all applicatio
 ### 6. Centralized State Management (Zustand)
 *   **Verification Method**: Verify that changing focus plans, ticking, completing sessions, opening modals, and switching tabs update instantly and consistently across the interface with no local state lags.
 *   **Verification Method**: Run `npm run build` to confirm zero typecheck or build errors.
+
+### 7. Standup Copy Analytics
+*   **Verification Method**: Click "Copy Report" on the standup compiler panel for any format.
+*   **Verification Method**: Query the `copy_logs` database table using a database client or script. Verify that a new record is created with the correct `userId` and the copied `format` (e.g., `slack`, `ytb`, or `markdown`).

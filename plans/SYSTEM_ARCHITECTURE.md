@@ -49,6 +49,7 @@ model User {
   createdAt DateTime   @default(now())
   logs      FocusLog[]
   plans     TaskPlan[]
+  copyLogs  CopyLog[]
 
   @@map("users")
 }
@@ -83,6 +84,19 @@ model FocusLog {
 
   @@map("focus_logs")
 }
+
+### E. Copy Log Entity (`copy-log.prisma`)
+```prisma
+model CopyLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format    String   // e.g. "slack" | "ytb" | "markdown"
+  createdAt DateTime @default(now())
+
+  @@map("copy_logs")
+}
+```
 ```
 
 ---
@@ -115,7 +129,9 @@ mindflow/
     │       │   └── register/
     │       │       └── route.ts # JWT Registration route
     │       ├── logs/
-    │       │   └── route.ts    # GET (fetch accomplishments) & POST (write log)
+    │       │   ├── route.ts    # GET (fetch accomplishments) & POST (write log)
+    │       │   └── copy/
+    │       │       └── route.ts # POST (log a copy report action)
     │       └── plans/
     │           ├── route.ts    # GET (fetch incomplete plans) & POST (sync active plans)
     │           └── validate/
@@ -136,7 +152,8 @@ mindflow/
     │       │   ├── index.prisma
     │       │   ├── user.prisma
     │       │   ├── task-plan.prisma
-    │       │   └── focus-log.prisma
+    │       │   ├── focus-log.prisma
+    │       │   └── copy-log.prisma
     │       ├── migrations/     # Generated SQL migration history files
     │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/

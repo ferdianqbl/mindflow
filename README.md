@@ -35,7 +35,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOi..."
 
 ### 3. Sync Database Tables & Compile Types
 
-Sync our database models (`User` and `FocusLog`) directly to your Supabase PostgreSQL instance and generate compiled Prisma Client types:
+Sync our database models (`User`, `FocusLog`, `TaskPlan`, and `CopyLog`) directly to your Supabase PostgreSQL instance and generate compiled Prisma Client types:
 
 ```bash
 npx prisma db push
