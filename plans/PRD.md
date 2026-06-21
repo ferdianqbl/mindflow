@@ -61,6 +61,10 @@ Unlike passive focus timers, Mindflow requires users to build a session task pla
     *   `format`: String format type (Slack, YTB, Markdown).
     *   `createdAt`: Timestamp.
 
+### Database Seeding (Demo & Testing)
+*   A database seed script is provided (`npx prisma db seed`) to populate the database with three default users: `demo@mindflow.io`, `owen@mindflow.io`, and `alice@mindflow.io` (all accounts share password `Password123`).
+*   Seeds focus achievements, copy logs, and pending task plans spanning 14 days to test donut charts, consistency maps, and real-time lounge presence updates across multiple windows.
+
 ### Analytics Dashboard
 *   Fetch and aggregate historical logs:
     *   Total focused hours and sessions.

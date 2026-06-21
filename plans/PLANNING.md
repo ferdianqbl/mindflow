@@ -74,7 +74,8 @@ This document indexes all documentation files for the full-stack edition of **Mi
 *   [x] Refactor hooks and components (`use-realtime-lounge.ts`, `dashboard-client.tsx`, `timer.tsx`) to bind to the store.
 *   [x] Verify Next.js build compilation and push update commits to remote repository.
 
-### Phase 11: Copy Standup Report Analytics
+### Phase 11: Copy Standup Report Analytics & Seeding
 *   [x] Create `CopyLog` Prisma schema and sync with Postgres database using `npx prisma db push`.
 *   [x] Implement `/api/logs/copy` handler to log clipboard copy events to PostgreSQL.
 *   [x] Update `handleCopy` in `standup-panel.tsx` to asynchronously log copy events.
+*   [x] Create `src/db/prisma/seed.ts` to seed three distinct users (`demo`, `owen`, `alice`) with full logs and plans.

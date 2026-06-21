@@ -154,6 +154,7 @@ mindflow/
     │       │   ├── task-plan.prisma
     │       │   ├── focus-log.prisma
     │       │   └── copy-log.prisma
+    │       ├── seed.ts         # TypeScript database seed script
     │       ├── migrations/     # Generated SQL migration history files
     │       └── generated/      # Generated Prisma Client type definitions
     ├── hooks/

@@ -66,3 +66,7 @@ This document presents the verification and validation tracker of all applicatio
 ### 7. Standup Copy Analytics
 *   **Verification Method**: Click "Copy Report" on the standup compiler panel for any format.
 *   **Verification Method**: Query the `copy_logs` database table using a database client or script. Verify that a new record is created with the correct `userId` and the copied `format` (e.g., `slack`, `ytb`, or `markdown`).
+
+### 8. Database Seeding & Mock Users
+*   **Verification Method**: Run `npx prisma db seed` locally.
+*   **Verification Method**: Log in using `demo@mindflow.io`, `owen@mindflow.io`, or `alice@mindflow.io` with password `Password123`. Verify that the dashboard analytics grids, donut charts, active task plans list, and copy logs timeline populate instantly with pre-generated status records.
