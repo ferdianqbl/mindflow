@@ -42,7 +42,22 @@ npx prisma db push
 npx prisma generate
 ```
 
-### 4. Boot the Local Server
+### 4. Seed Demo Data (Optional)
+
+To populate the database with test user accounts, active task plans, and two weeks of focus/copy analytics log data:
+
+```bash
+npx prisma db seed
+```
+
+This creates three separate accounts (all sharing the password `Password123`):
+*   `demo@mindflow.io`
+*   `owen@mindflow.io`
+*   `alice@mindflow.io`
+
+Reviewers can open separate browser windows (or incognito tabs), log in using different emails, and see active timers and status updates synchronizing live in the **Co-Working Lounge**.
+
+### 5. Boot the Local Server
 
 Launch the local Hot-Module-Replacement development server:
 
