@@ -45,6 +45,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## 📁 Project Design & Planning Documents
+
+Detailed design, database schemas, planning roadmap, product specs, and validation criteria are documented in the following design plans:
+*   [Product Requirements Document (PRD)](./plans/PRD.md)
+*   [UI/UX Design Specification](./plans/DESIGN.md)
+*   [System Architecture Specification](./plans/SYSTEM_ARCHITECTURE.md)
+*   [Project Planning & Roadmap](./plans/PLANNING.md)
+*   [Verification & Validation Tracker](./plans/VALIDATION_RESULTS.md)
+
+---
+
 ## 📝 Product Specification Questions ( Owen / Pixel8Labs )
 
 ### 1. What it is, and how to run it
