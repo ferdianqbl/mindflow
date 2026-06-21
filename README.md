@@ -128,13 +128,15 @@ Standard Pomodoro apps exist, but they are passive and don't record outcomes. He
 
 ### 5. What you put in scope, what you left out, and why
 
-- **In Scope**: Glassmorphic dark UI, self-hosted Custom JWT Cookie Authentication (`bcryptjs` + `jose`), database logging (Prisma + Postgres), a real-time Co-working presence lounge, Zustand centralized global state management, and Slack/YTB/Markdown formatters.
-- **Left Out**: OAuth integrations (Google/GitHub login) to avoid API keys setup friction for local review, and calendar synced timelines.
+*   **In Scope**: I prioritized a premium glassmorphic dark UI to make the workspace look and feel inspiring to live in. Technically, I focused on completing the core feedback loop: task planning (so you don't start a passive timer), session validation (to check off completed work), a custom cookie-based JWT authentication, a real-time lobby, and a central Zustand store.
+*   **Left Out**:
+    *   *OAuth Integrations (GitHub/Google)*: I intentionally skipped third-party OAuth to avoid API key setup friction during local review. I instead built a standard, self-contained email/password signup flow using hashed password validation.
+    *   *Direct Integrations (Slack webhooks / Jira)*: Setting up direct webhook channels requires API credentials and tokens. To keep things zero-config, I built a one-click "Copy Report" compiler with support for multiple clean templates (Slack, YTB, Markdown) instead.
 
 ### 6. Where you didn't have answers, what you assumed
 
-- _Assumption_: Assumed co-working users only need to see active states (`Focusing`, `Resting`, `Idle`) and countdowns for motivational peer pressure.
-- _Solution_: Implemented an absolute epoch timestamp sync system: instead of broadcasting websocket events every second (which hits free-tier rate limits), clients only broadcast when their timer state shifts, and observers calculate active ticks locally.
+*   *Lounge Privacy vs. Transparency*: I wasn't sure if users would want their exact task descriptions visible to coworkers in the lounge. I assumed that displaying just their active Pomodoro mode (`Focusing`, `Resting`, `Idle`) and countdown timer provides the perfect balance of peer accountability without invading individual privacy.
+*   *WebSocket Scale & Rate Limits*: High-concurrency WebSocket channels (like Supabase Presence) can easily hit rate limits and lag if they broadcast countdown seconds (`secondsLeft`) every single second for multiple users. I assumed that Observers only need to receive a user's absolute end time (`endTime`) when their state changes (start, pause, reset, skip). Observers then calculate the remaining ticking digits locally client-side, saving substantial network bandwidth.
 
 ### 7. Three questions you'd ask a real user before building more
 
